@@ -1,0 +1,143 @@
+========================================
+智慧交通燈控制系統 v4.0 - 打包說明
+========================================
+
+📦 方案 1：最小包（約 60 MB）
+適合：只需要基本功能
+
+包含文件：
+  ✅ index.html
+  ✅ tesla_cybertruck.glb
+  ✅ README.md
+
+打包指令：
+  Linux/Mac:
+    zip -r pico_traffic_mini.zip index.html tesla_cybertruck.glb README.md
+  
+  Windows:
+    選擇這三個文件 → 右鍵 → 傳送到 → 壓縮的資料夾
+
+========================================
+
+📦 方案 2：完整包（約 61 MB）
+適合：需要所有功能和模型選擇
+
+包含文件：
+  ✅ index.html
+  ✅ tesla_cybertruck.glb
+  ✅ tesla_cybertruck2.glb
+  ✅ tesla_cybertruck3.glb
+  ✅ README.md
+
+打包指令：
+  Linux/Mac:
+    zip -r pico_traffic_full.zip index.html *.glb README.md
+  
+  Windows:
+    選擇所有文件 → 右鍵 → 傳送到 → 壓縮的資料夾
+
+========================================
+
+📤 分享方式
+
+方式 1：雲端硬碟
+  1. 上傳到 Google Drive / Dropbox / OneDrive
+  2. 分享連結給對方
+  3. 對方下載並解壓縮
+
+方式 2：USB 隨身碟
+  1. 複製整個資料夾到隨身碟
+  2. 給對方
+
+方式 3：GitHub（推薦給開發者）
+  1. 推送到 GitHub
+  2. 對方 git clone 下載
+
+方式 4：區域網路傳輸
+  使用 scp, rsync 或檔案分享
+
+========================================
+
+🚀 對方收到後如何使用
+
+步驟 1：解壓縮
+  將 .zip 文件解壓縮到任意位置
+
+步驟 2：確認文件結構
+  pico_traffic/
+  ├── index.html              ✅
+  ├── tesla_cybertruck.glb    ✅
+  └── README.md               ✅
+
+步驟 3：啟動本地伺服器
+
+  方法 A - Python（最簡單）：
+    1. 打開終端機/命令提示字元
+    2. cd pico_traffic
+    3. python3 -m http.server 8000
+    4. 打開瀏覽器：http://localhost:8000/index.html
+
+  方法 B - Node.js：
+    1. cd pico_traffic
+    2. npx http-server -p 8000
+    3. 打開瀏覽器：http://localhost:8000/index.html
+
+  方法 C - 直接打開（不推薦）：
+    雙擊 index.html（可能無法載入模型）
+
+========================================
+
+✅ 驗證安裝成功
+
+打開瀏覽器後，應該看到：
+  1. 「載入 Tesla Cybertruck 模型中...」
+  2. 幾秒後模型載入完成
+  3. 看到十字路口和紅綠燈
+  4. 可以調整車流量滑桿
+  5. 點擊測試按鈕可以看到車輛
+
+如果看到灰色方塊代替車輛：
+  → 模型文件可能損壞或路徑錯誤
+  → 確認 tesla_cybertruck.glb 在同一目錄
+
+========================================
+
+🔧 常見問題
+
+Q: 沒有安裝 Python 怎麼辦？
+A: 可以下載安裝：https://www.python.org/downloads/
+   或使用 Node.js：https://nodejs.org/
+
+Q: 可以直接雙擊 HTML 嗎？
+A: 可以，但可能因為跨域問題無法載入模型
+   強烈建議使用本地伺服器
+
+Q: 如何在手機上看？
+A: 1. 在電腦上啟動伺服器（使用 --bind 0.0.0.0）
+   2. 找到電腦 IP（例如 192.168.1.100）
+   3. 手機瀏覽器訪問：http://192.168.1.100:8000/index.html
+
+Q: 檔案太大怎麼辦？
+A: tesla_cybertruck.glb 是 60MB
+   如果需要，可以：
+   1. 使用雲端硬碟分享
+   2. 壓縮成 .zip（可能減少到 40-50MB）
+   3. 使用檔案傳輸工具（如 WeTransfer）
+
+========================================
+
+📧 技術支援
+
+如果遇到問題，請檢查：
+  1. 文件是否完整（特別是 .glb 模型）
+  2. 是否使用本地伺服器
+  3. 瀏覽器控制台（F12）的錯誤訊息
+  4. README.md 的故障排除章節
+
+========================================
+
+版本：v4.0
+更新：2025-12-12
+
+🚗 祝使用愉快！ 🚦
+

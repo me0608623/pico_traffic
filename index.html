@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧交通燈控制系統 v4.0 - Three.js Tesla Cybertruck</title>
+    
+    <!-- Import Map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a0;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a855f7;
+            --red-on: #ff2d2d;
+            --yellow-on: #ffd000;
+            --green-on: #00ff5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        /* 左側控制面板 */
+        .control-panel {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .traffic-control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .slider-control {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-label span:first-child {
+            font-weight: 600;
+        }
+
+        .traffic-value {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .traffic-value.low {
+            background: rgba(0, 255, 90, 0.2);
+            color: var(--green-on);
+        }
+
+        .traffic-value.medium {
+            background: rgba(255, 208, 0, 0.2);
+            color: var(--yellow-on);
+        }
+
+        .traffic-value.high {
+            background: rgba(255, 45, 45, 0.2);
+            color: var(--red-on);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .submit-button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-buttons-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .test-button {
+            padding: 12px 15px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .test-button-ns {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .test-button-ns:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(52, 152, 219, 0.5);
+            background: linear-gradient(135deg, #2980b9, #21618c);
+        }
+
+        .test-button-ew {
+            background: linear-gradient(135deg, #e67e22, #d68910);
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        }
+
+        .test-button-ew:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(230, 126, 34, 0.5);
+            background: linear-gradient(135deg, #d68910, #ba7506);
+        }
+
+        .test-button:active {
+            transform: translateY(0);
+        }
+
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 連線設定 */
+        .connection-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .ip-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ip-input-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .ip-input {
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .ip-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .ip-input::placeholder {
+            color: rgba(136, 136, 160, 0.5);
+        }
+
+        /* 模型選擇器 */
+        .model-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .model-select {
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .model-select:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .model-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .model-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding: 10px;
+        }
+
+        .model-info {
+            padding: 10px 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 3px solid var(--accent-cyan);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* 中間 Three.js 場景 */
+        .scene-wrapper {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            position: relative;
+            height: 700px;
+        }
+
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f0f0f0;
+            display: block;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 8px;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 212, 255, 0.2);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* 右側面板 */
+        .response-panel {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: var(--green-on);
+        }
+
+        .status-dot.error {
+            background: var(--red-on);
+        }
+
+        .status-dot.processing {
+            background: var(--yellow-on);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .gpt-response {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .gpt-response-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .gpt-response-content {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+
+        .gpt-response-content.placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .countdown-container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .countdown-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .countdown-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .traffic-stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .history-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+
+        #history-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-cyan);
+            font-size: 0.85rem;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        /* 重置按鈕 */
+        .reset-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            z-index: 1000;
+            letter-spacing: 0.5px;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(231, 76, 60, 0.5);
+        }
+
+        .reset-button:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 1400px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .scene-wrapper {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚦 Smart Traffic Control</h1>
+            <p class="subtitle">Three.js Tesla Cybertruck Traffic Simulation</p>
+        </header>
+
+        <div class="main-layout">
+            <!-- 左側控制面板 -->
+            <div class="control-panel">
+                <div class="panel-title">Pico W 連線設定</div>
+                
+                <div class="connection-section">
+                    <div class="ip-input-group">
+                        <label for="pico-ip-input">IP 位址：</label>
+                        <input type="text" id="pico-ip-input" class="ip-input" 
+                               value="10.207.59.163" placeholder="例如：192.168.1.100">
+                    </div>
+                    <div class="ip-input-group">
+                        <label for="pico-port-input">連接埠：</label>
+                        <input type="text" id="pico-port-input" class="ip-input" 
+                               value="80" placeholder="80">
+                    </div>
+                </div>
+
+                <div class="panel-title">車流量控制</div>
+                
+                <div class="traffic-control-section">
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>🔼 北向</span>
+                            <span class="traffic-value low" id="north-value">低</span>
+                        </div>
+                        <input type="range" min="0" max="2" value="0" id="north-slider" 
+                               oninput="updateTrafficValue('north', this.value)">
+                    </div>
+
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>🔽 南向</span>
+                            <span class="traffic-value low" id="south-value">低</span>
+                        </div>
+                        <input type="range" min="0" max="2" value="0" id="south-slider" 
+                               oninput="updateTrafficValue('south', this.value)">
+                    </div>
+
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>▶️ 東向</span>
+                            <span class="traffic-value low" id="east-value">低</span>
+                        </div>
+                        <input type="range" min="0" max="2" value="0" id="east-slider" 
+                               oninput="updateTrafficValue('east', this.value)">
+                    </div>
+
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>◀️ 西向</span>
+                            <span class="traffic-value low" id="west-value">低</span>
+                        </div>
+                        <input type="range" min="0" max="2" value="0" id="west-slider" 
+                               oninput="updateTrafficValue('west', this.value)">
+                    </div>
+                </div>
+
+                <button class="submit-button" id="submit-btn" onclick="submitTrafficData()">
+                    📡 發送至 Pico W
+                </button>
+
+                <div class="test-buttons-group">
+                    <button class="test-button test-button-ns" onclick="testTrafficFlow('north-south')">
+                        ⬍ 測試南北向
+                    </button>
+                    <button class="test-button test-button-ew" onclick="testTrafficFlow('east-west')">
+                        ⬌ 測試東西向
+                    </button>
+                </div>
+
+                <div class="model-selector">
+                    <div class="panel-title">車輛模型選擇</div>
+                    <select id="model-selector" class="model-select" onchange="switchModel(this.value)">
+                        <option value="tesla_cybertruck.glb">Tesla Cybertruck (預設)</option>
+                        <option value="tesla_cybertruck1.glb">Tesla Cybertruck 1</option>
+                        <option value="tesla_cybertruck2.glb">Tesla Cybertruck 2</option>
+                        <option value="tesla_cybertruck3.glb">Tesla Cybertruck 3</option>
+                    </select>
+                    <div class="model-info" id="model-info">
+                        當前模型：tesla_cybertruck.glb
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中間 Three.js 場景 -->
+            <div class="scene-wrapper">
+                <canvas id="three-canvas"></canvas>
+                <div class="loading-overlay" id="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">載入 Tesla Cybertruck 模型中...</div>
+                </div>
+            </div>
+
+            <!-- 右側面板 -->
+            <div class="response-panel">
+                <div class="panel-title">系統狀態</div>
+                
+                <div class="status-indicator">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span class="status-text" id="status-text">等待設定車流量...</span>
+                </div>
+
+                <div class="gpt-response">
+                    <div class="gpt-response-title">
+                        <span>🤖</span>
+                        GPT 回應
+                    </div>
+                    <div class="gpt-response-content placeholder" id="gpt-content">
+                        等待 AI 決策指令...
+                    </div>
+                </div>
+
+                <div class="countdown-container">
+                    <div class="countdown-label">當前燈號剩餘時間</div>
+                    <div class="countdown-value" id="countdown">--</div>
+                </div>
+
+                <div class="traffic-stats">
+                    <div class="panel-title">當前燈號狀態</div>
+                    <div class="stat-item">
+                        <span class="stat-label">🔼 北向</span>
+                        <span class="stat-value" id="light-status-north" style="color: #ff2d2d;">🔴</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">🔽 南向</span>
+                        <span class="stat-value" id="light-status-south" style="color: #ff2d2d;">🔴</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">▶️ 東向</span>
+                        <span class="stat-value" id="light-status-east" style="color: #ff2d2d;">🔴</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">◀️ 西向</span>
+                        <span class="stat-value" id="light-status-west" style="color: #ff2d2d;">🔴</span>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="panel-title">操作紀錄</div>
+                    <div id="history-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            智慧交通燈控制系統 v4.0 | Three.js Tesla Cybertruck | Powered by Pico W + GPT
+        </footer>
+
+        <button class="reset-button" onclick="resetAllVehicles()">
+            🔄 重置所有車輛
+        </button>
+    </div>
+
+    <script type="module">
+        // ============================================
+        // Three.js 模組引入
+        // ============================================
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ============================================
+        // 全域常數與配置
+        // ============================================
+        // Pico W IP 現在從輸入欄位讀取
+        function getPicoIP() {
+            return document.getElementById('pico-ip-input')?.value || '10.207.59.163';
+        }
+        
+        function getPicoPort() {
+            return document.getElementById('pico-port-input')?.value || '80';
+        }
+        
+        const trafficLevels = ['low', 'medium', 'high'];
+        const trafficLabels = { low: '低', medium: '中', high: '高' };
+        
+        const SPAWN_RATE = {
+            low: 3000,      // 從 2000 增加到 3000（增加間距）
+            medium: 1500,  // 從 1000 增加到 1500（增加間距）
+            high: 800      // 從 500 增加到 800（增加間距）
+        };
+
+        // ============================================
+        // Three.js 場景設置
+        // ============================================
+        let scene, camera, renderer, controls;
+        let cybertruckModel = null; // 原始模型
+        let vehicles = []; // 場景中的車輛實例
+        let roadMesh, intersectionGroup;
+        let currentModelPath = 'tesla_cybertruck.glb'; // 當前使用的模型路徑
+        
+        // 不同模型的旋轉補償（每個模型的預設朝向可能不同）
+        // 可以針對不同方向設定不同的補償
+        const modelRotationOffset = {
+            'tesla_cybertruck.glb': { 
+                all: 0,                                       // 全局補償
+                north: Math.PI,                                // 北向額外補償：180度
+                south: Math.PI                                 // 南向額外補償：180度
+            },
+            'tesla_cybertruck1.glb': { all: 0 },             // 模型1
+            'tesla_cybertruck2.glb': { 
+                all: Math.PI / 2,                            // 全局補償：逆時針90度
+                east: Math.PI,                                // 東向額外補償：180度
+                west: Math.PI                                 // 西向額外補償：180度
+            },
+            'tesla_cybertruck3.glb': { 
+                all: -Math.PI / 2,                           // 全局補償：順時針90度
+                north: Math.PI,                              // 北向額外補償：180度
+                south: Math.PI                               // 南向額外補償：180度
+            }
+        };
+        
+        // 不同模型的高度偏移（Y座標）
+        const modelHeightOffset = {
+            'tesla_cybertruck.glb': 1.0,     // 預設模型需要提升高度（避免一半在地底）
+            'tesla_cybertruck1.glb': 0,      // 模型1
+            'tesla_cybertruck2.glb': 0,      // 模型2
+            'tesla_cybertruck3.glb': 0       // 模型3
+        };
+
+        function initThreeJS() {
+            const canvas = document.getElementById('three-canvas');
+            const wrapper = canvas.parentElement;
+            
+            // 場景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+            scene.fog = new THREE.Fog(0xf0f0f0, 50, 200);
+            
+            // 相機
+            const aspect = wrapper.clientWidth / wrapper.clientHeight;
+            camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+            camera.position.set(0, 50, 70);
+            camera.lookAt(0, 0, 0);
+            
+            // 渲染器
+            renderer = new THREE.WebGLRenderer({ 
+                canvas, 
+                antialias: true,
+                alpha: true 
+            });
+            renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // 燈光 - AmbientLight（環境光）
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            // 燈光 - DirectionalLight（方向光）
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 80, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.left = -60;
+            directionalLight.shadow.camera.right = 60;
+            directionalLight.shadow.camera.top = 60;
+            directionalLight.shadow.camera.bottom = -60;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // 額外的填充光
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(-50, 30, -50);
+            scene.add(fillLight);
+            
+            // OrbitControls（軌道控制）
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 20;
+            controls.maxDistance = 150;
+            controls.maxPolarAngle = Math.PI / 2.2;
+            
+            // 創建路口場景
+            createIntersection();
+            
+            // RWD 響應
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // 載入 Tesla Cybertruck 模型
+            loadCybertruckModel();
+            
+            // 開始渲染循環
+            animate();
+        }
+
+        function createIntersection() {
+            intersectionGroup = new THREE.Group();
+            
+            // 地面（草地）
+            const groundGeometry = new THREE.PlaneGeometry(200, 200);
+            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -0.1;
+            ground.receiveShadow = true;
+            intersectionGroup.add(ground);
+            
+            // 道路（十字路口）
+            const roadMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2a2a2a,
+                roughness: 0.8 
+            });
+            
+            // 水平道路
+            const roadH = new THREE.Mesh(
+                new THREE.PlaneGeometry(80, 20),
+                roadMaterial
+            );
+            roadH.rotation.x = -Math.PI / 2;
+            roadH.receiveShadow = true;
+            intersectionGroup.add(roadH);
+            
+            // 垂直道路
+            const roadV = new THREE.Mesh(
+                new THREE.PlaneGeometry(20, 80),
+                roadMaterial
+            );
+            roadV.rotation.x = -Math.PI / 2;
+            roadV.receiveShadow = true;
+            intersectionGroup.add(roadV);
+            
+            // 道路標線
+            const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            
+            // 中央虛線（水平）
+            for (let i = -35; i <= 35; i += 5) {
+                const line = new THREE.Mesh(
+                    new THREE.PlaneGeometry(3, 0.3),
+                    lineMaterial
+                );
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(i, 0.01, 0);
+                intersectionGroup.add(line);
+            }
+            
+            // 中央虛線（垂直）
+            for (let i = -35; i <= 35; i += 5) {
+                const line = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.3, 3),
+                    lineMaterial
+                );
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(0, 0.01, i);
+                intersectionGroup.add(line);
+            }
+            
+            // 紅綠燈柱（簡化版）
+            createTrafficLight(-12, -12, 'north');
+            createTrafficLight(-12, 12, 'south');
+            createTrafficLight(12, -12, 'east');
+            createTrafficLight(12, 12, 'west');
+            
+            // 繪製停止線
+            createStopLines();
+            
+            scene.add(intersectionGroup);
+        }
+
+        function createStopLines() {
+            // 停止線材質（白色，稍微發光）
+            const stopLineMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // 停止線位置對應代碼中的 stopLines
+            // north: -12, south: 12, east: 10, west: -10
+            
+            // 北向停止線（橫向，位於 z=-12）
+            const stopLineNorth = new THREE.Mesh(
+                new THREE.PlaneGeometry(6, 0.3),
+                stopLineMaterial
+            );
+            stopLineNorth.rotation.x = -Math.PI / 2;
+            stopLineNorth.position.set(3, 0.02, -12);
+            intersectionGroup.add(stopLineNorth);
+            
+            // 南向停止線（橫向，位於 z=12）
+            const stopLineSouth = new THREE.Mesh(
+                new THREE.PlaneGeometry(6, 0.3),
+                stopLineMaterial
+            );
+            stopLineSouth.rotation.x = -Math.PI / 2;
+            stopLineSouth.position.set(-3, 0.02, 12);
+            intersectionGroup.add(stopLineSouth);
+            
+            // 東向停止線（縱向，位於 x=10，車輛從右邊來，停在右側）
+            const stopLineEast = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.3, 6),
+                stopLineMaterial
+            );
+            stopLineEast.rotation.x = -Math.PI / 2;
+            stopLineEast.position.set(10, 0.02, 5);  // z座標從3改為5，對應新車道位置
+            intersectionGroup.add(stopLineEast);
+            
+            // 西向停止線（縱向，位於 x=-10，車輛從左邊來，停在左側）
+            const stopLineWest = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.3, 6),
+                stopLineMaterial
+            );
+            stopLineWest.rotation.x = -Math.PI / 2;
+            stopLineWest.position.set(-10, 0.02, -5);  // z座標從-3改為-5，對應新車道位置
+            intersectionGroup.add(stopLineWest);
+        }
+
+        function createTrafficLight(x, z, direction) {
+            // 創建紅綠燈組（包含燈箱和燈光）
+            const trafficLightGroup = new THREE.Group();
+            trafficLightGroup.position.set(x, 0, z);
+            
+            // 根據方向設置旋轉
+            const rotations = {
+                north: 0,              // 面向南（0度）
+                south: Math.PI,        // 面向北（180度）
+                east: Math.PI / 2,     // 面向西（90度）
+                west: -Math.PI / 2     // 面向東（-90度）
+            };
+            trafficLightGroup.rotation.y = rotations[direction] || 0;
+            
+            // 燈柱
+            const poleGeometry = new THREE.CylinderGeometry(0.3, 0.3, 8, 8);
+            const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+            pole.position.y = 4;
+            pole.castShadow = true;
+            trafficLightGroup.add(pole);
+            
+            // 燈箱
+            const lightBoxGeometry = new THREE.BoxGeometry(1, 3, 0.5);
+            const lightBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const lightBox = new THREE.Mesh(lightBoxGeometry, lightBoxMaterial);
+            lightBox.position.y = 8.5;
+            lightBox.castShadow = true;
+            trafficLightGroup.add(lightBox);
+            
+            // 紅燈（初始亮起）
+            const lightRed = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 16, 16),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0xff0000, 
+                    emissive: 0xff0000,
+                    emissiveIntensity: 1
+                })
+            );
+            lightRed.position.set(0, 9.5, 0.3);
+            lightRed.userData = { type: 'red', direction, isOn: true };
+            trafficLightGroup.add(lightRed);
+            
+            // 黃燈（初始關閉）
+            const lightYellow = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 16, 16),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x333300,
+                    emissive: 0x000000
+                })
+            );
+            lightYellow.position.set(0, 8.5, 0.3);
+            lightYellow.userData = { type: 'yellow', direction, isOn: false };
+            trafficLightGroup.add(lightYellow);
+            
+            // 綠燈（初始關閉）
+            const lightGreen = new THREE.Mesh(
+                new THREE.SphereGeometry(0.3, 16, 16),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x003300,
+                    emissive: 0x000000
+                })
+            );
+            lightGreen.position.set(0, 7.5, 0.3);
+            lightGreen.userData = { type: 'green', direction, isOn: false };
+            trafficLightGroup.add(lightGreen);
+            
+            intersectionGroup.add(trafficLightGroup);
+        }
+
+        function loadCybertruckModel(modelFileName = 'tesla_cybertruck.glb') {
+            const loader = new GLTFLoader();
+            currentModelPath = modelFileName;
+            
+            // 嘗試多個可能的路徑
+            const modelPaths = [
+                `./${modelFileName}`,
+                modelFileName,
+                `/${modelFileName}`
+            ];
+            
+            let currentPathIndex = 0;
+            
+            function tryLoadModel() {
+                const currentPath = modelPaths[currentPathIndex];
+                console.log(`嘗試載入模型: ${currentPath}`);
+                
+                loader.load(
+                    currentPath,
+                    (gltf) => {
+                        console.log('✅ 模型載入成功！', gltf);
+                        cybertruckModel = gltf.scene;
+                        
+                        // 調整模型大小（放大車輛）
+                        const box = new THREE.Box3().setFromObject(cybertruckModel);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 5 / maxDim; // 增加到 5（原本是 3）讓車子更大
+                        cybertruckModel.scale.set(scale, scale, scale);
+                        
+                        console.log('模型尺寸:', size, '縮放比例:', scale);
+                        
+                        // 啟用陰影
+                        cybertruckModel.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                                // 確保材質正確
+                                if (child.material) {
+                                    child.material.needsUpdate = true;
+                                }
+                            }
+                        });
+                        
+                        // 隱藏載入畫面
+                        document.getElementById('loading').classList.add('hidden');
+                        addHistory('✅ Tesla Cybertruck 模型載入成功');
+                    },
+                    (progress) => {
+                        if (progress.total > 0) {
+                            const percent = (progress.loaded / progress.total * 100).toFixed(0);
+                            const loadingText = document.querySelector('.loading-text');
+                            if (loadingText) {
+                                loadingText.textContent = `載入模型中... ${percent}%`;
+                            }
+                            console.log(`載入進度: ${percent}%`);
+                        }
+                    },
+                    (error) => {
+                        console.error(`路徑 ${currentPath} 載入失敗:`, error);
+                        
+                        // 嘗試下一個路徑
+                        currentPathIndex++;
+                        if (currentPathIndex < modelPaths.length) {
+                            console.log('嘗試下一個路徑...');
+                            tryLoadModel();
+                        } else {
+                            // 所有路徑都失敗，使用備用方案
+                            console.error('所有路徑都載入失敗，使用備用方塊');
+                            const loadingText = document.querySelector('.loading-text');
+                            if (loadingText) {
+                                loadingText.textContent = '⚠️ 使用簡化方塊代替（模型載入失敗）';
+                                loadingText.style.color = '#ffd000';
+                            }
+                            addHistory('⚠️ 模型載入失敗，使用簡化方塊代替');
+                            
+                            // 使用簡單方塊作為備用
+                            const boxGeometry = new THREE.BoxGeometry(3, 1.5, 5);
+                            const boxMaterial = new THREE.MeshStandardMaterial({ 
+                                color: 0x888888,
+                                metalness: 0.5,
+                                roughness: 0.5
+                            });
+                            cybertruckModel = new THREE.Mesh(boxGeometry, boxMaterial);
+                            cybertruckModel.castShadow = true;
+                            cybertruckModel.receiveShadow = true;
+                            
+                            setTimeout(() => {
+                                document.getElementById('loading').classList.add('hidden');
+                            }, 2000);
+                        }
+                    }
+                );
+            }
+            
+            // 開始載入
+            tryLoadModel();
+        }
+
+        function onWindowResize() {
+            const wrapper = document.querySelector('.scene-wrapper');
+            const width = wrapper.clientWidth;
+            const height = wrapper.clientHeight;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            updateAllVehicles();
+            renderer.render(scene, camera);
+        }
+
+        // ============================================
+        // 車輛管理系統
+        // ============================================
+        let nextVehicleId = 0;
+        let spawnIntervals = {};
+        let systemStarted = false;
+        let trafficLightStatus = {
+            north: 'red',
+            south: 'red',
+            east: 'red',
+            west: 'red'
+        };
+        let currentTrafficLevels = {
+            north: 'low',
+            south: 'low',
+            east: 'low',
+            west: 'low'
+        };
+
+        class Vehicle {
+            constructor(id, direction) {
+                this.id = id;
+                this.direction = direction;
+                this.speed = 0;
+                this.maxSpeed = 0.5;
+                this.acceleration = 0.02;
+                this.deceleration = 0.04;
+                
+                // Three.js 對象
+                if (cybertruckModel) {
+                    this.mesh = cybertruckModel.clone();
+                    this.mesh.userData = { vehicleId: id, direction };
+                    scene.add(this.mesh);
+                    
+                    // 設置初始位置和旋轉
+                    this.setInitialTransform();
+                    
+                    // 立即檢查紅綠燈狀態並執行首次更新
+                    const lightStatus = trafficLightStatus[this.direction];
+                    if (lightStatus === 'red' || lightStatus === 'yellow') {
+                        this.speed = 0; // 確保紅燈方向的車輛生成時速度為0
+                        console.log(`🚗 車 ${this.id} (${this.direction}) 生成於${lightStatus}燈，初始速度=0，停在紅燈前`);
+                    } else {
+                        // 綠燈時可以給初始速度
+                        this.speed = this.acceleration;
+                    }
+                }
+            }
+
+            setInitialTransform() {
+                // 基礎旋轉角度（根據預設模型1調整）
+                const baseRotations = {
+                    north: -Math.PI / 2,         // 向南行駛（朝南）-90度
+                    south: Math.PI / 2,          // 向北行駛（朝北）90度
+                    east: 0,                     // 向西行駛（朝西）0度
+                    west: Math.PI                // 向東行駛（朝東）180度
+                };
+                
+                // 根據當前模型添加額外的旋轉補償
+                const modelOffset = modelRotationOffset[currentModelPath] || { all: 0 };
+                const baseExtraRotation = modelOffset.all || 0;
+                
+                // 針對特定方向的額外補償
+                const directionExtraRotation = modelOffset[this.direction] || 0;
+                const totalExtraRotation = baseExtraRotation + directionExtraRotation;
+                
+                const paths = {
+                    north: { x: 3, z: -40, rotation: baseRotations.north + totalExtraRotation },
+                    south: { x: -3, z: 40, rotation: baseRotations.south + totalExtraRotation },
+                    east: { x: 40, z: 5, rotation: baseRotations.east + totalExtraRotation },    // 從 z:3 改為 z:5（增加間距）
+                    west: { x: -40, z: -5, rotation: baseRotations.west + totalExtraRotation }   // 從 z:-3 改為 z:-5（增加間距）
+                };
+                
+                const path = paths[this.direction];
+                if (this.mesh && path) {
+                    // 根據模型類型設置高度偏移
+                    const heightOffset = modelHeightOffset[currentModelPath] || 0;
+                    this.mesh.position.set(path.x, heightOffset, path.z);
+                    this.mesh.rotation.y = path.rotation;
+                    
+                    // 調試信息
+                    if (this.id < 4) {
+                        const degrees = (path.rotation * 180 / Math.PI).toFixed(0);
+                        const baseDegrees = (baseExtraRotation * 180 / Math.PI).toFixed(0);
+                        const dirDegrees = (directionExtraRotation * 180 / Math.PI).toFixed(0);
+                        console.log(`🚗 車輛 ${this.id} (${this.direction}): 旋轉=${degrees}度 (基礎+${baseDegrees}度+方向${dirDegrees}度, 模型=${currentModelPath})`);
+                    }
+                }
+            }
+
+            update() {
+                if (!this.mesh) return false;
+                
+                const distanceToStopLine = this.getDistanceToStopLine();
+                const lightStatus = trafficLightStatus[this.direction];
+                
+                // 檢查車輛是否已經越過停止線（進入路口）
+                const hasPassedStopLine = this.hasPassedStopLine();
+                
+                // 最優先：如果已經越過停止線，無論燈號如何都必須繼續通過路口（不能停在路口中間）
+                if (hasPassedStopLine) {
+                    // 已越過停止線，必須繼續通過路口
+                    this.speed = Math.min(this.maxSpeed, this.speed + this.acceleration);
+                } else if (lightStatus === 'green') {
+                    // 綠燈且還沒越過停止線，加速前進
+                    this.speed = Math.min(this.maxSpeed, this.speed + this.acceleration);
+                } else if (lightStatus === 'red' || lightStatus === 'yellow') {
+                    // 紅燈或黃燈，且還沒越過停止線，需要停止
+                    if (distanceToStopLine <= 5) {
+                        // 距離停止線5單位以內，立即停止（確保停在停止線之前）
+                        this.speed = 0;
+                    } else if (distanceToStopLine < 20) {
+                        // 距離停止線20單位以內，開始漸進減速
+                        const slowdownFactor = (distanceToStopLine - 5) / 15; // 5-20單位之間
+                        const decelRate = this.deceleration * (2 - slowdownFactor); // 越近減速越快
+                        this.speed = Math.max(0, this.speed - decelRate);
+                    } else {
+                        // 距離較遠（>20單位），正常減速
+                        this.speed = Math.max(0, this.speed - this.deceleration);
+                    }
+                } else {
+                    // 其他情況，減速停止
+                    this.speed = Math.max(0, this.speed - this.deceleration);
+                }
+                
+                // 更新位置
+                if (this.direction === 'north') {
+                    this.mesh.position.z += this.speed;
+                } else if (this.direction === 'south') {
+                    this.mesh.position.z -= this.speed;
+                } else if (this.direction === 'east') {
+                    this.mesh.position.x -= this.speed;
+                } else if (this.direction === 'west') {
+                    this.mesh.position.x += this.speed;
+                }
+                
+                return this.hasReachedEnd();
+            }
+
+            checkShouldStop() {
+                const distanceToStopLine = this.getDistanceToStopLine();
+                const lightStatus = trafficLightStatus[this.direction];
+                
+                // 增強調試信息 - 顯示紅燈車輛的詳細狀態
+                if ((lightStatus === 'red' || lightStatus === 'yellow') && distanceToStopLine >= 0 && this.speed > 0) {
+                    console.log(`⚠️ 紅燈車輛檢測: 車 ${this.id} (${this.direction}): 燈=${lightStatus}, 距離=${distanceToStopLine.toFixed(1)}, 速度=${this.speed.toFixed(2)} → 應該停止`);
+                }
+                
+                // 已經越過停止線，不應該停止（必須通過路口）
+                if (this.hasPassedStopLine()) {
+                    return false;
+                }
+                
+                // 如果是紅燈或黃燈，且還沒越過停止線，必須停車
+                // 在距離停止線5單位以內就必須停車
+                if (lightStatus === 'red' || lightStatus === 'yellow') {
+                    if (distanceToStopLine <= 5) {
+                        return true; // 距離停止線5單位以內，強制停車
+                    }
+                    return true; // 紅燈時無論距離多遠都要準備停車
+                }
+                
+                // 綠燈可以通過
+                return false;
+            }
+
+            getDistanceToStopLine() {
+                if (!this.mesh) return 100;
+                
+                const stopLines = {
+                    north: -12,
+                    south: 12,
+                    east: 10,   // 東向停止線在右側（車輛從右邊來，停在右側）
+                    west: -10   // 西向停止線在左側（車輛從左邊來，停在左側）
+                };
+                
+                const stopLine = stopLines[this.direction];
+                if (this.direction === 'north' || this.direction === 'south') {
+                    // 南北向：距離 = 停止線位置 - 車輛位置（正數表示還沒到達，負數表示已越過）
+                    return this.direction === 'north' 
+                        ? stopLine - this.mesh.position.z 
+                        : this.mesh.position.z - stopLine;
+                } else {
+                    // 東西向：距離 = 停止線位置 - 車輛位置（正數表示還沒到達，負數表示已越過）
+                    // 但要注意：east 從右向左移動（x 從 40 減到 -40），west 從左向右移動（x 從 -40 加到 40）
+                    if (this.direction === 'east') {
+                        // east: 停止線 x=10，車輛從 x=40 向 x=-40 移動
+                        // 如果 position.x <= 10，說明已經越過停止線，距離應該是負數
+                        // 如果 position.x > 10，說明還沒到達停止線，距離應該是正數
+                        return stopLine - this.mesh.position.x;
+                    } else {
+                        // west: 停止線 x=-10，車輛從 x=-40 向 x=40 移動
+                        // 如果 position.x >= -10，說明已經越過停止線，距離應該是負數
+                        // 如果 position.x < -10，說明還沒到達停止線，距離應該是正數
+                        return this.mesh.position.x - stopLine;
+                    }
+                }
+            }
+            
+            // 檢查車輛是否已經越過停止線（進入路口）
+            hasPassedStopLine() {
+                if (!this.mesh) return false;
+                
+                const stopLines = {
+                    north: -12,
+                    south: 12,
+                    east: 10,
+                    west: -10
+                };
+                
+                const stopLine = stopLines[this.direction];
+                const pos = this.mesh.position;
+                
+                // 根據方向判斷是否越過停止線
+                if (this.direction === 'north') {
+                    // 北向：從 z=-40 向 z=40 移動，停止線 z=-12
+                    // 如果 z >= -12，說明已經越過停止線
+                    return pos.z >= stopLine;
+                } else if (this.direction === 'south') {
+                    // 南向：從 z=40 向 z=-40 移動，停止線 z=12
+                    // 如果 z <= 12，說明已經越過停止線
+                    return pos.z <= stopLine;
+                } else if (this.direction === 'east') {
+                    // 東向：從 x=40 向 x=-40 移動，停止線 x=10
+                    // 如果 x <= 10，說明已經越過停止線
+                    return pos.x <= stopLine;
+                } else if (this.direction === 'west') {
+                    // 西向：從 x=-40 向 x=40 移動，停止線 x=-10
+                    // 如果 x >= -10，說明已經越過停止線
+                    return pos.x >= stopLine;
+                }
+                return false;
+            }
+
+            hasReachedEnd() {
+                if (!this.mesh) return true;
+                const pos = this.mesh.position;
+                return Math.abs(pos.x) > 45 || Math.abs(pos.z) > 45;
+            }
+
+            remove() {
+                if (this.mesh) {
+                    scene.remove(this.mesh);
+                    this.mesh = null;
+                }
+            }
+        }
+
+        function spawnVehicle(direction) {
+            if (!systemStarted || !cybertruckModel) return;
+            
+            // 限制最多 10 台車
+            if (vehicles.length >= 10) {
+                return;
+            }
+            
+            // 檢查該方向起點後方是否已經有車輛（避免重疊）
+            const spawnPositions = {
+                north: { x: 3, z: -40 },
+                south: { x: -3, z: 40 },
+                east: { x: 40, z: 5 },
+                west: { x: -40, z: -5 }
+            };
+            
+            const spawnPos = spawnPositions[direction];
+            const minSpawnDistance = 15; // 最小生成間距（單位）- 從10增加到15，確保車輛間距更大
+            
+            // 停止線位置（用於檢查是否有車輛停在停止線前）
+            const stopLines = {
+                north: -12,
+                south: 12,
+                east: 10,
+                west: -10
+            };
+            const stopLine = stopLines[direction];
+            
+            // 檢查該方向是否有車輛在生成位置附近或停止線附近（避免重疊）
+            let canSpawn = true;
+            for (let vehicle of vehicles) {
+                if (vehicle.direction === direction && vehicle.mesh) {
+                    const pos = vehicle.mesh.position;
+                    let isTooClose = false;
+                    let reason = '';
+                    
+                    // 根據方向判斷車輛是否太近
+                    if (direction === 'north') {
+                        // 北向：起點 z=-40，停止線 z=-12
+                        const xDistance = Math.abs(pos.x - spawnPos.x);
+                        if (xDistance < 2) {
+                            // 在同一車道
+                            // 檢查1：生成位置後方（z < -40 + minSpawnDistance）
+                            if (pos.z < spawnPos.z + minSpawnDistance) {
+                                const distanceFromSpawn = Math.abs(pos.z - spawnPos.z);
+                                if (distanceFromSpawn < minSpawnDistance) {
+                                    isTooClose = true;
+                                    reason = `生成位置後方 ${distanceFromSpawn.toFixed(1)}單位`;
+                                }
+                            }
+                            // 檢查2：停止線附近（z 在停止線附近 3 單位內）
+                            if (pos.z >= stopLine - 3 && pos.z <= stopLine + 3) {
+                                isTooClose = true;
+                                reason = `停止線附近 (z=${pos.z.toFixed(1)})`;
+                            }
+                        }
+                    } else if (direction === 'south') {
+                        // 南向：起點 z=40，停止線 z=12
+                        const xDistance = Math.abs(pos.x - spawnPos.x);
+                        if (xDistance < 2) {
+                            if (pos.z > spawnPos.z - minSpawnDistance) {
+                                const distanceFromSpawn = Math.abs(pos.z - spawnPos.z);
+                                if (distanceFromSpawn < minSpawnDistance) {
+                                    isTooClose = true;
+                                    reason = `生成位置後方 ${distanceFromSpawn.toFixed(1)}單位`;
+                                }
+                            }
+                            if (pos.z >= stopLine - 3 && pos.z <= stopLine + 3) {
+                                isTooClose = true;
+                                reason = `停止線附近 (z=${pos.z.toFixed(1)})`;
+                            }
+                        }
+                    } else if (direction === 'east') {
+                        // 東向：起點 x=40，停止線 x=10
+                        const zDistance = Math.abs(pos.z - spawnPos.z);
+                        if (zDistance < 2) {
+                            // 在同一車道
+                            // 檢查1：生成位置後方（x > 40 - minSpawnDistance）
+                            if (pos.x > spawnPos.x - minSpawnDistance) {
+                                const distanceFromSpawn = Math.abs(pos.x - spawnPos.x);
+                                if (distanceFromSpawn < minSpawnDistance) {
+                                    isTooClose = true;
+                                    reason = `生成位置後方 ${distanceFromSpawn.toFixed(1)}單位`;
+                                }
+                            }
+                            // 檢查2：停止線附近（x 在停止線附近 3 單位內）
+                            if (pos.x >= stopLine - 3 && pos.x <= stopLine + 3) {
+                                isTooClose = true;
+                                reason = `停止線附近 (x=${pos.x.toFixed(1)})`;
+                            }
+                        }
+                    } else if (direction === 'west') {
+                        // 西向：起點 x=-40，停止線 x=-10
+                        const zDistance = Math.abs(pos.z - spawnPos.z);
+                        if (zDistance < 2) {
+                            if (pos.x < spawnPos.x + minSpawnDistance) {
+                                const distanceFromSpawn = Math.abs(pos.x - spawnPos.x);
+                                if (distanceFromSpawn < minSpawnDistance) {
+                                    isTooClose = true;
+                                    reason = `生成位置後方 ${distanceFromSpawn.toFixed(1)}單位`;
+                                }
+                            }
+                            if (pos.x >= stopLine - 3 && pos.x <= stopLine + 3) {
+                                isTooClose = true;
+                                reason = `停止線附近 (x=${pos.x.toFixed(1)})`;
+                            }
+                        }
+                    }
+                    
+                    // 如果車輛太近，不能生成
+                    if (isTooClose) {
+                        canSpawn = false;
+                        console.log(`⛔ 車 ${vehicle.id} (${direction}) ${reason}，跳過生成`);
+                        break;
+                    }
+                }
+            }
+            
+            // 額外檢查：確保生成位置本身沒有車輛（防止完全重疊）
+            // 只檢查同一方向的車輛，避免不同方向的車輛互相干擾
+            for (let vehicle of vehicles) {
+                if (vehicle.direction === direction && vehicle.mesh) {
+                    const pos = vehicle.mesh.position;
+                    const xDistance = Math.abs(pos.x - spawnPos.x);
+                    const zDistance = Math.abs(pos.z - spawnPos.z);
+                    // 如果同一方向的車輛在生成位置附近（5單位內），不能生成
+                    if (xDistance < 5 && zDistance < 5) {
+                        canSpawn = false;
+                        console.log(`⛔ 車 ${vehicle.id} (${direction}) 在生成位置 (${spawnPos.x}, ${spawnPos.z}) 附近 (x差=${xDistance.toFixed(1)}, z差=${zDistance.toFixed(1)})，跳過生成`);
+                        break;
+                    }
+                }
+            }
+            
+            // 如果生成位置附近有車，跳過這次生成
+            if (!canSpawn) {
+                return;
+            }
+            
+            const vehicle = new Vehicle(nextVehicleId++, direction);
+            vehicles.push(vehicle);
+            console.log(`✅ 車 ${vehicle.id} (${direction}) 生成於位置 (${spawnPos.x}, ${spawnPos.z})`);
+            
+            // 調試：列出該方向所有車輛的位置
+            const sameDirVehicles = vehicles.filter(v => v.direction === direction && v.mesh);
+            if (sameDirVehicles.length > 1) {
+                console.log(`   該方向共有 ${sameDirVehicles.length} 輛車：`);
+                sameDirVehicles.forEach(v => {
+                    const p = v.mesh.position;
+                    console.log(`     車 ${v.id}: (${p.x.toFixed(1)}, ${p.z.toFixed(1)})`);
+                });
+            }
+            
+            // 當達到上限時在控制台提示
+            if (vehicles.length === 10) {
+                console.log('⚠️ 已達到車輛上限（10台）');
+            }
+        }
+
+        function startSpawning(direction, level) {
+            if (spawnIntervals[direction]) {
+                clearInterval(spawnIntervals[direction]);
+            }
+            const rate = SPAWN_RATE[level];
+            spawnIntervals[direction] = setInterval(() => {
+                spawnVehicle(direction);
+            }, rate);
+            spawnVehicle(direction);
+        }
+
+        function startAllTraffic() {
+            ['north', 'south', 'east', 'west'].forEach(direction => {
+                startSpawning(direction, currentTrafficLevels[direction]);
+            });
+            addHistory('車流系統啟動');
+        }
+
+        function updateAllVehicles() {
+            if (!systemStarted) return;
+            
+            vehicles = vehicles.filter(vehicle => {
+                const reachedEnd = vehicle.update();
+                if (reachedEnd) {
+                    vehicle.remove();
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        // ============================================
+        // 紅綠燈控制
+        // ============================================
+        function setLight(direction, color) {
+            trafficLightStatus[direction] = color;
+            
+            console.log(`設置紅綠燈: ${direction} -> ${color}`);
+            
+            // 更新 Three.js 場景中的燈光
+            scene.traverse((obj) => {
+                if (obj.userData && obj.userData.direction === direction) {
+                    const isActive = obj.userData.type === color;
+                    
+                    if (isActive) {
+                        // 燈光亮起
+                        const activeColors = {
+                            red: { color: 0xff0000, emissive: 0xff0000 },
+                            yellow: { color: 0xffff00, emissive: 0xffff00 },
+                            green: { color: 0x00ff00, emissive: 0x00ff00 }
+                        };
+                        
+                        const lightColor = activeColors[color];
+                        if (lightColor && obj.material) {
+                            obj.material.color.setHex(lightColor.color);
+                            obj.material.emissive.setHex(lightColor.emissive);
+                            obj.material.emissiveIntensity = 1;
+                            obj.material.needsUpdate = true;
+                            obj.userData.isOn = true;
+                            console.log(`  ✅ ${direction} ${obj.userData.type} 燈亮起`);
+                        }
+                    } else {
+                        // 燈光關閉（暗淡）
+                        const offColors = {
+                            red: 0x330000,
+                            yellow: 0x333300,
+                            green: 0x003300
+                        };
+                        
+                        const offColor = offColors[obj.userData.type];
+                        if (offColor !== undefined && obj.material) {
+                            obj.material.color.setHex(offColor);
+                            obj.material.emissive.setHex(0x000000);
+                            obj.material.emissiveIntensity = 0;
+                            obj.material.needsUpdate = true;
+                            obj.userData.isOn = false;
+                        }
+                    }
+                }
+            });
+            
+            // 更新 UI
+            const statusElement = document.getElementById(`light-status-${direction}`);
+            if (statusElement) {
+                if (color === 'red') {
+                    statusElement.textContent = '🔴';
+                    statusElement.style.color = '#ff2d2d';
+                } else if (color === 'yellow') {
+                    statusElement.textContent = '🟡';
+                    statusElement.style.color = '#ffd000';
+                } else if (color === 'green') {
+                    statusElement.textContent = '🟢';
+                    statusElement.style.color = '#00ff5a';
+                }
+            }
+        }
+
+        function updateTrafficLights(direction, action) {
+            console.log(`\n🚦 ========== 更新紅綠燈 ==========`);
+            console.log(`   方向: ${direction}, 動作: ${action}`);
+            
+            // 先全部設為紅燈
+            console.log(`   步驟1: 全部設為紅燈`);
+            ['north', 'south', 'east', 'west'].forEach(dir => {
+                setLight(dir, 'red');
+            });
+            
+            // 根據 GPT 決策設定綠燈（互鎖機制）
+            if (action === 'GREEN') {
+                if (direction === 'north-south') {
+                    console.log(`   步驟2: 設定南北向綠燈`);
+                    setLight('north', 'green');
+                    setLight('south', 'green');
+                    console.log(`   互鎖: 東西向保持紅燈`);
+                    // 確保東西向是紅燈
+                    setLight('east', 'red');
+                    setLight('west', 'red');
+                } else if (direction === 'east-west') {
+                    console.log(`   步驟2: 設定東西向綠燈`);
+                    setLight('east', 'green');
+                    setLight('west', 'green');
+                    console.log(`   互鎖: 南北向保持紅燈`);
+                    // 確保南北向是紅燈
+                    setLight('north', 'red');
+                    setLight('south', 'red');
+                }
+            }
+            
+            // 確認當前狀態
+            console.log(`   最終狀態:`, trafficLightStatus);
+            console.log(`   ✅ 北=${trafficLightStatus.north}, 南=${trafficLightStatus.south}, 東=${trafficLightStatus.east}, 西=${trafficLightStatus.west}`);
+            console.log(`================================\n`);
+        }
+
+        // ============================================
+        // UI 控制函數
+        // ============================================
+        let countdownInterval = null;
+        let currentCountdown = 0;
+
+        window.updateTrafficValue = function(direction, value) {
+            const level = trafficLevels[parseInt(value)];
+            currentTrafficLevels[direction] = level;
+            
+            const valueElement = document.getElementById(`${direction}-value`);
+            valueElement.textContent = trafficLabels[level];
+            valueElement.className = `traffic-value ${level}`;
+            
+            if (systemStarted) {
+                startSpawning(direction, level);
+            }
+        };
+
+        window.submitTrafficData = async function() {
+            if (!systemStarted) {
+                if (!cybertruckModel) {
+                    alert('請等待模型載入完成');
+                    return;
+                }
+                startAllTraffic();
+                systemStarted = true;
+            }
+            
+            await requestTrafficDecision();
+        };
+
+        async function requestTrafficDecision() {
+            const picoIP = getPicoIP();
+            const picoPort = getPicoPort();
+            const url = `http://${picoIP}:${picoPort}/traffic`;
+            
+            setStatus('processing', '正在請求 AI 決策...');
+            
+            const payload = {
+                north: currentTrafficLevels.north,
+                south: currentTrafficLevels.south,
+                east: currentTrafficLevels.east,
+                west: currentTrafficLevels.west,
+                timestamp: new Date().toISOString()
+            };
+            
+            addHistory(`請求 AI 決策: N=${payload.north}, S=${payload.south}, E=${payload.east}, W=${payload.west}`);
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                handleGPTResponse(data);
+            } catch (error) {
+                console.error('Error:', error);
+                setStatus('error', `連線錯誤: ${error.message}`);
+                updateGPTContent(`無法連線到 Pico W (${picoIP}:${picoPort})`, true);
+                addHistory(`錯誤: ${error.message}`);
+                setTimeout(() => simulateResponse(), 1000);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function handleGPTResponse(data) {
+            setStatus('connected', '已連線 - 收到 AI 指令');
+            const message = data.message || `方向: ${data.direction}\n動作: ${data.action}\n時長: ${data.duration} 秒`;
+            updateGPTContent(message);
+            updateTrafficLights(data.direction, data.action);
+            startCountdown(data.duration);
+            addHistory(`AI 指令: ${data.direction} ${data.action} ${data.duration}s`);
+        }
+
+        function simulateResponse() {
+            const direction = Math.random() > 0.5 ? 'north-south' : 'east-west';
+            const duration = 15 + Math.floor(Math.random() * 10);
+            const simulatedData = {
+                direction,
+                action: 'GREEN',
+                duration,
+                message: `【模擬模式】\n\n系統自動切換至 ${direction === 'north-south' ? '南北向' : '東西向'} 通行\n時長: ${duration} 秒`
+            };
+            handleGPTResponse(simulatedData);
+        }
+
+        function startCountdown(seconds) {
+            if (countdownInterval) clearInterval(countdownInterval);
+            currentCountdown = seconds;
+            document.getElementById('countdown').textContent = currentCountdown;
+            
+            countdownInterval = setInterval(() => {
+                currentCountdown--;
+                document.getElementById('countdown').textContent = currentCountdown;
+                
+                if (currentCountdown === 3) {
+                    ['north', 'south', 'east', 'west'].forEach(dir => {
+                        if (trafficLightStatus[dir] === 'green') {
+                            setLight(dir, 'yellow');
+                        }
+                    });
+                }
+                
+                if (currentCountdown <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('countdown').textContent = '--';
+                    ['north', 'south', 'east', 'west'].forEach(dir => {
+                        setLight(dir, 'red');
+                    });
+                    addHistory('燈號週期結束 - 等待下次指令');
+                }
+            }, 1000);
+        }
+
+        window.resetAllVehicles = function() {
+            vehicles.forEach(vehicle => vehicle.remove());
+            vehicles = [];
+            
+            ['north', 'south', 'east', 'west'].forEach(direction => {
+                if (spawnIntervals[direction]) {
+                    clearInterval(spawnIntervals[direction]);
+                    spawnIntervals[direction] = null;
+                }
+            });
+            
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            ['north', 'south', 'east', 'west'].forEach(dir => setLight(dir, 'red'));
+            
+            systemStarted = false;
+            nextVehicleId = 0;
+            currentCountdown = 0;
+            document.getElementById('countdown').textContent = '--';
+            
+            setStatus('', '所有車輛已重置，等待設定車流量...');
+            addHistory('🔄 系統重置完成，所有車輛已清除');
+        };
+
+        function setStatus(status, text) {
+            const dot = document.getElementById('status-dot');
+            const textElement = document.getElementById('status-text');
+            dot.className = `status-dot ${status}`;
+            textElement.textContent = text;
+        }
+
+        function updateGPTContent(content, isError = false) {
+            const element = document.getElementById('gpt-content');
+            element.textContent = content;
+            element.classList.toggle('placeholder', isError);
+        }
+
+        function addHistory(message) {
+            const historyList = document.getElementById('history-list');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('zh-TW');
+            
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <div class="history-time">${timeStr}</div>
+                <div>${message}</div>
+            `;
+            
+            historyList.insertBefore(item, historyList.firstChild);
+            while (historyList.children.length > 15) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // ============================================
+        // 測試車流功能
+        // ============================================
+        window.testTrafficFlow = function(direction) {
+            // 如果還沒啟動系統，先啟動
+            if (!systemStarted) {
+                if (!cybertruckModel) {
+                    alert('⚠️ 請等待模型載入完成');
+                    return;
+                }
+                startAllTraffic();
+                systemStarted = true;
+                addHistory('🚗 測試模式：車流系統已啟動');
+            }
+            
+            // 使用指定的方向測試
+            const directionName = direction === 'north-south' ? '南北向' : '東西向';
+            const directionIcon = direction === 'north-south' ? '⬍' : '⬌';
+            
+            setStatus('processing', `測試模式：${directionName} 運行中...`);
+            addHistory(`🧪 測試模式：${directionIcon} ${directionName} 綠燈`);
+            
+            const duration = 20; // 固定 20 秒便於測試
+            
+            const testData = {
+                direction: direction,
+                action: 'GREEN',
+                duration: duration,
+                message: `【測試模式】\n\n${directionIcon} ${directionName} 通行\n時長: ${duration} 秒\n\n這是測試模式，不會連接到 Pico W`
+            };
+            
+            handleGPTResponse(testData);
+            setStatus('connected', `測試模式：${directionName} 運行中`);
+        };
+
+        // ============================================
+        // 模型切換功能
+        // ============================================
+        window.switchModel = async function(modelPath) {
+            // 顯示載入中
+            const loadingOverlay = document.getElementById('loading');
+            loadingOverlay.classList.remove('hidden');
+            const loadingText = document.querySelector('.loading-text');
+            loadingText.textContent = '正在切換模型...';
+            loadingText.style.color = '';
+            
+            // 移除所有現有車輛
+            vehicles.forEach(vehicle => vehicle.remove());
+            vehicles = [];
+            
+            // 停止生成新車輛
+            ['north', 'south', 'east', 'west'].forEach(direction => {
+                if (spawnIntervals[direction]) {
+                    clearInterval(spawnIntervals[direction]);
+                    spawnIntervals[direction] = null;
+                }
+            });
+            
+            // 暫停系統
+            const wasStarted = systemStarted;
+            systemStarted = false;
+            
+            // 重新載入模型
+            loadCybertruckModel(modelPath);
+            
+            // 等待模型載入完成後恢復系統
+            const checkModelLoaded = setInterval(() => {
+                if (cybertruckModel) {
+                    clearInterval(checkModelLoaded);
+                    if (wasStarted) {
+                        systemStarted = true;
+                        startAllTraffic();
+                    }
+                    
+                    // 更新顯示信息
+                    const modelInfo = document.getElementById('model-info');
+                    if (modelInfo) {
+                        modelInfo.textContent = `當前模型：${modelPath}`;
+                    }
+                    
+                    addHistory(`🔄 已切換模型：${modelPath}`);
+                }
+            }, 100);
+            
+            // 超時處理（10秒）
+            setTimeout(() => {
+                clearInterval(checkModelLoaded);
+            }, 10000);
+        };
+
+        // ============================================
+        // 初始化
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initThreeJS();
+            setStatus('', '等待設定車流量...');
+            addHistory('系統初始化完成');
+            addHistory(`目標設備: Pico W (${getPicoIP()}:${getPicoPort()})`);
+            addHistory('請設定 IP 位址、調整車流量，然後發送至 Pico W');
+            
+            // 當 IP 改變時更新歷史記錄
+            document.getElementById('pico-ip-input').addEventListener('change', function() {
+                addHistory(`🔄 更新目標設備: ${getPicoIP()}:${getPicoPort()}`);
+            });
+        });
+    </script>
+</body>
+</html>

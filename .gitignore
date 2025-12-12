@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.pyc
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+package-lock.json
+
+# 編輯器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 系統文件
+Thumbs.db
+desktop.ini
+
+# 壓縮文件
+*.zip
+*.tar.gz
+*.rar
+
+# 臨時文件
+*.tmp
+*.bak
+*.log
+
+# Python 腳本（如果不需要在網頁上）
+main.py
+gpt_client.py
+
+# 舊版本
+index2/
+readme.md
+
