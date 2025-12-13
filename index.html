@@ -373,6 +373,12 @@
         }
 
         /* 中間 Three.js 場景 */
+        .center-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
         .scene-wrapper {
             background: var(--bg-card);
             border-radius: 16px;
@@ -586,6 +592,185 @@
             margin-bottom: 4px;
         }
 
+        /* 救護車控制區域 */
+        .ambulance-control {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            border: 2px solid rgba(255, 45, 45, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ambulance-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff2d2d, #ff6b6b, #ff2d2d);
+            animation: ambulance-stripe 1s linear infinite;
+        }
+
+        @keyframes ambulance-stripe {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 0; }
+        }
+
+        .ambulance-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ambulance-icon {
+            font-size: 2rem;
+            animation: ambulance-flash 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes ambulance-flash {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .ambulance-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            letter-spacing: 1px;
+        }
+
+        .ambulance-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .ambulance-direction-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ambulance-direction-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .ambulance-direction-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ambulance-direction-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ambulance-direction-label:hover {
+            border-color: rgba(255, 107, 107, 0.5);
+            background: rgba(255, 45, 45, 0.1);
+        }
+
+        .ambulance-direction-option input[type="radio"]:checked + .ambulance-direction-label {
+            border-color: #ff6b6b;
+            background: rgba(255, 45, 45, 0.2);
+            box-shadow: 0 0 20px rgba(255, 45, 45, 0.3);
+        }
+
+        .direction-icon {
+            font-size: 1.5rem;
+        }
+
+        .direction-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ambulance-dispatch-btn {
+            width: 100%;
+            padding: 18px 25px;
+            background: linear-gradient(135deg, #ff2d2d, #cc0000);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 45, 45, 0.4);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .ambulance-dispatch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 45, 45, 0.6);
+            background: linear-gradient(135deg, #ff4545, #dd1111);
+        }
+
+        .ambulance-dispatch-btn:active {
+            transform: translateY(0);
+        }
+
+        .ambulance-dispatch-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            animation: none;
+        }
+
+        .ambulance-dispatch-btn.dispatching {
+            animation: dispatch-pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes dispatch-pulse {
+            0% { box-shadow: 0 4px 20px rgba(255, 45, 45, 0.4); }
+            100% { box-shadow: 0 4px 40px rgba(255, 45, 45, 0.8); }
+        }
+
+        .ambulance-status {
+            margin-top: 15px;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            display: none;
+        }
+
+        .ambulance-status.active {
+            display: block;
+            color: #ff6b6b;
+            border-left: 3px solid #ff2d2d;
+            text-align: left;
+            animation: status-blink 1s ease-in-out infinite;
+        }
+
+        @keyframes status-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         /* 重置按鈕 */
         .reset-button {
             position: fixed;
@@ -629,6 +814,25 @@
 
             .scene-wrapper {
                 height: 600px;
+            }
+
+            .ambulance-control {
+                margin-top: 15px;
+            }
+
+            .ambulance-direction-group {
+                flex-direction: row;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .ambulance-direction-group {
+                flex-direction: column;
+            }
+
+            .ambulance-dispatch-btn {
+                font-size: 1rem;
+                padding: 15px 20px;
             }
         }
     </style>
@@ -715,7 +919,7 @@
                     <div class="panel-title">車輛模型選擇</div>
                     <select id="model-selector" class="model-select" onchange="switchModel(this.value)">
                         <option value="tesla_cybertruck.glb">Tesla Cybertruck (預設)</option>
-                        <option value="tesla_cybertruck1.glb">Tesla Cybertruck 1</option>
+                        <option value="toyota.glb">Toyota</option>
                         <option value="tesla_cybertruck2.glb">Tesla Cybertruck 2</option>
                         <option value="tesla_cybertruck3.glb">Tesla Cybertruck 3</option>
                     </select>
@@ -725,12 +929,53 @@
                 </div>
             </div>
 
-            <!-- 中間 Three.js 場景 -->
-            <div class="scene-wrapper">
-                <canvas id="three-canvas"></canvas>
-                <div class="loading-overlay" id="loading">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">載入 Tesla Cybertruck 模型中...</div>
+            <!-- 中間區域（場景 + 救護車控制） -->
+            <div class="center-column">
+                <!-- Three.js 場景 -->
+                <div class="scene-wrapper">
+                    <canvas id="three-canvas"></canvas>
+                    <div class="loading-overlay" id="loading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">載入 Tesla Cybertruck 模型中...</div>
+                    </div>
+                </div>
+
+                <!-- 救護車控制區域 -->
+                <div class="ambulance-control">
+                    <div class="ambulance-header">
+                        <span class="ambulance-icon">🚑</span>
+                        <div>
+                            <div class="ambulance-title">緊急救護車出動</div>
+                            <div class="ambulance-subtitle">啟動後將強制切換該方向為綠燈</div>
+                        </div>
+                    </div>
+
+                    <div class="ambulance-direction-group">
+                        <div class="ambulance-direction-option">
+                            <input type="radio" name="ambulance-direction" id="ambulance-ew" value="east-west" checked>
+                            <label for="ambulance-ew" class="ambulance-direction-label">
+                                <span class="direction-icon">⬌</span>
+                                <span class="direction-text">東西向</span>
+                            </label>
+                        </div>
+                        <div class="ambulance-direction-option">
+                            <input type="radio" name="ambulance-direction" id="ambulance-ns" value="north-south">
+                            <label for="ambulance-ns" class="ambulance-direction-label">
+                                <span class="direction-icon">⬍</span>
+                                <span class="direction-text">南北向</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="ambulance-dispatch-btn" id="ambulance-dispatch-btn" onclick="dispatchAmbulance()">
+                        <span>🚨</span>
+                        <span>救護車出動</span>
+                        <span>🚨</span>
+                    </button>
+
+                    <div class="ambulance-status" id="ambulance-status">
+                        🚑 救護車行駛中...
+                    </div>
                 </div>
             </div>
 
@@ -840,7 +1085,13 @@
                 north: Math.PI,                                // 北向額外補償：180度
                 south: Math.PI                                 // 南向額外補償：180度
             },
-            'tesla_cybertruck1.glb': { all: 0 },             // 模型1
+            'toyota.glb': { 
+                all: 0,
+                north: Math.PI / 2,                          // 南北向逆時針 90 度
+                south: Math.PI / 2,                          // 南北向逆時針 90 度
+                east: -Math.PI / 2,                          // 東西向順時針 90 度
+                west: -Math.PI / 2                           // 東西向順時針 90 度
+            },
             'tesla_cybertruck2.glb': { 
                 all: Math.PI / 2,                            // 全局補償：逆時針90度
                 east: Math.PI,                                // 東向額外補償：180度
@@ -856,7 +1107,7 @@
         // 不同模型的高度偏移（Y座標）
         const modelHeightOffset = {
             'tesla_cybertruck.glb': 1.0,     // 預設模型需要提升高度（避免一半在地底）
-            'tesla_cybertruck1.glb': 0,      // 模型1
+            'toyota.glb': 0,                 // Toyota 模型
             'tesla_cybertruck2.glb': 0,      // 模型2
             'tesla_cybertruck3.glb': 0       // 模型3
         };
@@ -1254,6 +1505,12 @@
             east: 'low',
             west: 'low'
         };
+
+        // 救護車狀態變量（需要在 updateAllVehicles 之前定義）
+        let ambulanceActive = false;
+        let ambulanceVehicle = null;
+        let ambulanceTimeout = null;
+        let previousLightState = null;
 
         class Vehicle {
             constructor(id, direction) {
@@ -1667,6 +1924,10 @@
             vehicles = vehicles.filter(vehicle => {
                 const reachedEnd = vehicle.update();
                 if (reachedEnd) {
+                    // 如果是救護車離開場景，結束救護車模式
+                    if (vehicle.isAmbulance && ambulanceActive) {
+                        endAmbulanceMode();
+                    }
                     vehicle.remove();
                     return false;
                 }
@@ -1957,6 +2218,339 @@
             historyList.insertBefore(item, historyList.firstChild);
             while (historyList.children.length > 15) {
                 historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // ============================================
+        // 救護車出動功能
+        // ============================================
+        let ambulanceModel = null; // 救護車專用模型
+
+        // 載入救護車模型
+        function loadAmbulanceModel() {
+            return new Promise((resolve, reject) => {
+                const loader = new GLTFLoader();
+                const modelPaths = [
+                    './ambulance.glb',
+                    'ambulance.glb',
+                    '/ambulance.glb'
+                ];
+                
+                let currentPathIndex = 0;
+                
+                function tryLoadModel() {
+                    const currentPath = modelPaths[currentPathIndex];
+                    console.log(`🚑 嘗試載入救護車模型: ${currentPath}`);
+                    
+                    loader.load(
+                        currentPath,
+                        (gltf) => {
+                            console.log('✅ 救護車模型載入成功！', gltf);
+                            ambulanceModel = gltf.scene;
+                            
+                            // 調整模型大小（放大 1.5 倍）
+                            const box = new THREE.Box3().setFromObject(ambulanceModel);
+                            const size = box.getSize(new THREE.Vector3());
+                            const maxDim = Math.max(size.x, size.y, size.z);
+                            const scale = (5 / maxDim) * 1.5; // 放大 1.5 倍
+                            ambulanceModel.scale.set(scale, scale, scale);
+                            
+                            // 啟用陰影
+                            ambulanceModel.traverse((child) => {
+                                if (child.isMesh) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+                            
+                            addHistory('✅ 救護車模型載入成功');
+                            resolve(ambulanceModel);
+                        },
+                        (progress) => {
+                            if (progress.total > 0) {
+                                const percent = (progress.loaded / progress.total * 100).toFixed(0);
+                                console.log(`🚑 救護車模型載入進度: ${percent}%`);
+                            }
+                        },
+                        (error) => {
+                            console.error(`路徑 ${currentPath} 載入失敗:`, error);
+                            currentPathIndex++;
+                            if (currentPathIndex < modelPaths.length) {
+                                tryLoadModel();
+                            } else {
+                                console.warn('⚠️ 救護車模型載入失敗，使用備用方案');
+                                // 使用白色方塊 + 紅十字作為備用
+                                const boxGeometry = new THREE.BoxGeometry(4, 2, 6);
+                                const boxMaterial = new THREE.MeshStandardMaterial({ 
+                                    color: 0xffffff,
+                                    metalness: 0.3,
+                                    roughness: 0.5
+                                });
+                                ambulanceModel = new THREE.Mesh(boxGeometry, boxMaterial);
+                                
+                                // 添加紅色十字標記
+                                const crossMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                                const crossH = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 0.5), crossMaterial);
+                                crossH.position.set(0, 1.05, 0);
+                                ambulanceModel.add(crossH);
+                                const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 2), crossMaterial);
+                                crossV.position.set(0, 1.05, 0);
+                                ambulanceModel.add(crossV);
+                                
+                                ambulanceModel.castShadow = true;
+                                ambulanceModel.receiveShadow = true;
+                                
+                                addHistory('⚠️ 使用備用救護車模型');
+                                resolve(ambulanceModel);
+                            }
+                        }
+                    );
+                }
+                
+                tryLoadModel();
+            });
+        }
+
+        class Ambulance {
+            constructor(id, direction) {
+                this.id = id;
+                this.direction = direction;
+                this.speed = 0;
+                this.maxSpeed = 0.8; // 救護車速度較快
+                this.acceleration = 0.04;
+                this.isAmbulance = true;
+                this.mesh = null;
+                this.flashLight1 = null;
+                this.flashLight2 = null;
+                this.flashPhase = 0;
+                
+                // 使用救護車專用模型
+                if (ambulanceModel) {
+                    this.mesh = ambulanceModel.clone();
+                    this.mesh.userData = { vehicleId: id, direction, isAmbulance: true };
+                    scene.add(this.mesh);
+                    
+                    // 設置初始位置和旋轉
+                    this.setInitialTransform();
+                    
+                    // 添加閃爍燈光效果
+                    this.flashLight1 = new THREE.PointLight(0xff0000, 3, 20);
+                    this.flashLight1.position.set(-1, 3, 0);
+                    this.mesh.add(this.flashLight1);
+                    
+                    this.flashLight2 = new THREE.PointLight(0x0000ff, 3, 20);
+                    this.flashLight2.position.set(1, 3, 0);
+                    this.mesh.add(this.flashLight2);
+                    
+                    console.log(`🚑 救護車 ${this.id} (${this.direction}) 已生成`);
+                }
+            }
+
+            setInitialTransform() {
+                // 救護車的旋轉角度（順時針多轉 90 度 = 減去 Math.PI / 2）
+                const rotationOffset = -Math.PI / 2; // 順時針 90 度
+                const baseRotations = {
+                    north: -Math.PI / 2 + rotationOffset + Math.PI,  // 南北向額外轉 180 度
+                    south: Math.PI / 2 + rotationOffset + Math.PI,   // 南北向額外轉 180 度
+                    east: 0 + rotationOffset,
+                    west: Math.PI + rotationOffset
+                };
+                
+                const paths = {
+                    north: { x: 3, z: -40, rotation: baseRotations.north },
+                    south: { x: -3, z: 40, rotation: baseRotations.south },
+                    east: { x: 40, z: 5, rotation: baseRotations.east },
+                    west: { x: -40, z: -5, rotation: baseRotations.west }
+                };
+                
+                const path = paths[this.direction];
+                if (this.mesh && path) {
+                    this.mesh.position.set(path.x, 1.0, path.z);
+                    this.mesh.rotation.y = path.rotation;
+                }
+            }
+
+            update() {
+                // 救護車不受紅綠燈影響，永遠全速前進
+                if (!this.mesh) return false;
+                
+                // 閃爍效果
+                this.flashPhase += 0.2;
+                if (this.flashLight1 && this.flashLight2) {
+                    const flash = Math.sin(this.flashPhase) > 0;
+                    this.flashLight1.intensity = flash ? 5 : 0;
+                    this.flashLight2.intensity = flash ? 0 : 5;
+                }
+                
+                // 救護車永遠加速（不受紅綠燈影響）
+                this.speed = Math.min(this.maxSpeed, this.speed + this.acceleration);
+                
+                // 更新位置
+                if (this.direction === 'north') {
+                    this.mesh.position.z += this.speed;
+                } else if (this.direction === 'south') {
+                    this.mesh.position.z -= this.speed;
+                } else if (this.direction === 'east') {
+                    this.mesh.position.x -= this.speed;
+                } else if (this.direction === 'west') {
+                    this.mesh.position.x += this.speed;
+                }
+                
+                return this.hasReachedEnd();
+            }
+
+            hasReachedEnd() {
+                if (!this.mesh) return true;
+                const pos = this.mesh.position;
+                return Math.abs(pos.x) > 45 || Math.abs(pos.z) > 45;
+            }
+
+            remove() {
+                if (this.flashLight1) {
+                    this.mesh.remove(this.flashLight1);
+                    this.flashLight1 = null;
+                }
+                if (this.flashLight2) {
+                    this.mesh.remove(this.flashLight2);
+                    this.flashLight2 = null;
+                }
+                if (this.mesh) {
+                    scene.remove(this.mesh);
+                    this.mesh = null;
+                }
+            }
+        }
+
+        window.dispatchAmbulance = async function() {
+            if (!cybertruckModel) {
+                alert('⚠️ 請等待車輛模型載入完成');
+                return;
+            }
+
+            if (ambulanceActive) {
+                addHistory('⚠️ 救護車已在行駛中');
+                return;
+            }
+
+            // 更新按鈕狀態
+            const dispatchBtn = document.getElementById('ambulance-dispatch-btn');
+            dispatchBtn.disabled = true;
+            dispatchBtn.innerHTML = '<span>🚑</span><span>準備中...</span><span>🚑</span>';
+
+            // 如果救護車模型尚未載入，先載入
+            if (!ambulanceModel) {
+                addHistory('🚑 正在載入救護車模型...');
+                try {
+                    await loadAmbulanceModel();
+                } catch (error) {
+                    console.error('救護車模型載入失敗:', error);
+                    dispatchBtn.disabled = false;
+                    dispatchBtn.innerHTML = '<span>🚨</span><span>救護車出動</span><span>🚨</span>';
+                    return;
+                }
+            }
+
+            // 如果系統尚未啟動，先啟動
+            if (!systemStarted) {
+                startAllTraffic();
+                systemStarted = true;
+                addHistory('🚗 系統已啟動');
+            }
+
+            // 獲取選擇的方向
+            const selectedDirection = document.querySelector('input[name="ambulance-direction"]:checked').value;
+            const isEastWest = selectedDirection === 'east-west';
+            const directionName = isEastWest ? '東西向' : '南北向';
+            const directionIcon = isEastWest ? '⬌' : '⬍';
+
+            // 保存當前燈號狀態
+            previousLightState = { ...trafficLightStatus };
+
+            // 強制切換紅綠燈：救護車方向變綠燈，其他方向變紅燈
+            console.log(`\n🚑 ========== 救護車出動 ==========`);
+            console.log(`   方向: ${directionName}`);
+            
+            // 先全部設為紅燈
+            ['north', 'south', 'east', 'west'].forEach(dir => {
+                setLight(dir, 'red');
+            });
+
+            // 設定救護車方向為綠燈
+            if (isEastWest) {
+                setLight('east', 'green');
+                setLight('west', 'green');
+                console.log('   東西向：綠燈');
+                console.log('   南北向：紅燈');
+            } else {
+                setLight('north', 'green');
+                setLight('south', 'green');
+                console.log('   南北向：綠燈');
+                console.log('   東西向：紅燈');
+            }
+
+            // 生成救護車
+            const spawnDirection = isEastWest 
+                ? (Math.random() > 0.5 ? 'east' : 'west')
+                : (Math.random() > 0.5 ? 'north' : 'south');
+            
+            ambulanceVehicle = new Ambulance(nextVehicleId++, spawnDirection);
+            vehicles.push(ambulanceVehicle);
+
+            // 更新 UI 狀態
+            ambulanceActive = true;
+            dispatchBtn.classList.add('dispatching');
+            dispatchBtn.innerHTML = '<span>🚨</span><span>救護車行駛中...</span><span>🚨</span>';
+
+            const statusElement = document.getElementById('ambulance-status');
+            statusElement.classList.add('active');
+            statusElement.innerHTML = `🚑 救護車正在 ${directionIcon} ${directionName} 行駛中，所有車輛請讓道！`;
+
+            // 更新系統狀態
+            setStatus('processing', `🚑 救護車出動：${directionName}優先通行`);
+            updateGPTContent(`【緊急救護車出動】\n\n${directionIcon} ${directionName} 強制綠燈\n救護車正在通過路口...\n\n⚠️ 所有車輛請讓道！`);
+            addHistory(`🚑 救護車出動：${directionIcon} ${directionName}`);
+
+            // 開始倒計時（救護車通過時間：15 秒）
+            const ambulanceDuration = 15;
+            startCountdown(ambulanceDuration);
+
+            // 設定超時，救護車通過後恢復正常
+            ambulanceTimeout = setTimeout(() => {
+                endAmbulanceMode();
+            }, ambulanceDuration * 1000);
+
+            console.log('================================\n');
+        };
+
+        function endAmbulanceMode() {
+            if (!ambulanceActive) return;
+
+            console.log('🚑 救護車已通過，恢復正常交通');
+
+            // 恢復 UI
+            ambulanceActive = false;
+            const dispatchBtn = document.getElementById('ambulance-dispatch-btn');
+            dispatchBtn.disabled = false;
+            dispatchBtn.classList.remove('dispatching');
+            dispatchBtn.innerHTML = '<span>🚨</span><span>救護車出動</span><span>🚨</span>';
+
+            const statusElement = document.getElementById('ambulance-status');
+            statusElement.classList.remove('active');
+
+            // 全部設為紅燈
+            ['north', 'south', 'east', 'west'].forEach(dir => {
+                setLight(dir, 'red');
+            });
+
+            // 更新狀態
+            setStatus('connected', '救護車已通過，等待下次指令');
+            addHistory('✅ 救護車已通過路口，交通恢復正常');
+
+            // 清理救護車引用
+            ambulanceVehicle = null;
+            if (ambulanceTimeout) {
+                clearTimeout(ambulanceTimeout);
+                ambulanceTimeout = null;
             }
         }
 
