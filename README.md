@@ -1,277 +1,286 @@
-# 智慧交通燈控制系統 v4.0
+# 🚦 智慧交通燈控制系統 v4.0
 
-Three.js Tesla Cybertruck 交通模擬系統
+[![部署狀態](https://img.shields.io/badge/deploy-active-success)](https://me0608623.github.io/pico_traffic/)
+[![授權](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## 📁 項目結構
+Three.js Tesla Cybertruck 交通模擬系統 - 結合 Pico W 硬體控制與 AI 決策的智慧交通系統
 
-```
-pico_traffic/
-├── index.html              # 主要 HTML 文件（包含所有代碼）
-├── tesla_cybertruck.glb    # Tesla Cybertruck 3D 模型（預設）
-├── tesla_cybertruck1.glb   # 備用模型 1（可選）
-├── tesla_cybertruck2.glb   # 備用模型 2（可選）
-├── tesla_cybertruck3.glb   # 備用模型 3（可選）
-└── README.md               # 本說明文件
-```
+**🌐 線上展示：** https://me0608623.github.io/pico_traffic/
+
+---
+
+## 📸 專案預覽
+
+- ✅ 3D Tesla Cybertruck 模型
+- ✅ 真實的紅綠燈控制邏輯
+- ✅ 智能車輛避障與重疊檢測
+- ✅ 黃燈邏輯（已越過停止線的車輛繼續通過）
+- ✅ 動態車流生成系統
+- ✅ 支援 Pico W 硬體連接
+- ✅ 可切換多個車輛模型
+
+---
 
 ## 🚀 快速開始
 
-### 方法 1：使用 Python（最簡單，推薦）
+### 方法 1：線上訪問（推薦）
 
-**前置需求：** 已安裝 Python 3
+直接訪問：**https://me0608623.github.io/pico_traffic/**
 
-**步驟：**
+無需安裝任何東西！
 
-1. 打開終端機/命令提示字元
-2. 切換到項目目錄：
-   ```bash
-   cd pico_traffic
-   ```
-3. 啟動本地伺服器：
-   ```bash
-   python3 -m http.server 8000
-   ```
-   
-   或在 Windows 上：
-   ```bash
-   python -m http.server 8000
-   ```
+### 方法 2：本地運行
 
-4. 打開瀏覽器訪問：
-   ```
-   http://localhost:8000/index.html
-   ```
+#### 前置需求
+- Python 3 或 Node.js
 
-5. 停止伺服器：按 `Ctrl+C`
-
----
-
-### 方法 2：使用 Node.js
-
-**前置需求：** 已安裝 Node.js
-
-**步驟：**
-
-1. 切換到項目目錄：
-   ```bash
-   cd pico_traffic
-   ```
-
-2. 啟動伺服器（無需安裝）：
-   ```bash
-   npx http-server -p 8000
-   ```
-
-3. 打開瀏覽器訪問：
-   ```
-   http://localhost:8000/index.html
-   ```
-
----
-
-### 方法 3：使用 PHP
-
-**前置需求：** 已安裝 PHP
-
-**步驟：**
-
+#### 使用 Python
 ```bash
 cd pico_traffic
-php -S localhost:8000
+python3 -m http.server 8000
+# 訪問 http://localhost:8000/index.html
 ```
 
-然後訪問 `http://localhost:8000/index.html`
+#### 使用 Node.js
+```bash
+cd pico_traffic
+npx http-server -p 8000
+# 訪問 http://localhost:8000/index.html
+```
 
 ---
 
-### 方法 4：直接打開（可能有限制）
+## 📋 專案結構
 
-**僅適用於簡單測試：**
-
-1. 雙擊 `index.html` 文件
-2. 使用瀏覽器打開
-
-> ⚠️ **注意：** 直接打開可能導致模型載入失敗（跨域問題），建議使用上述方法啟動本地伺服器。
-
----
-
-## 🌐 允許其他設備訪問（同一網路）
-
-### Python：
-```bash
-python3 -m http.server 8000 --bind 0.0.0.0
 ```
-
-### Node.js：
-```bash
-npx http-server -p 8000 -a 0.0.0.0
-```
-
-### PHP：
-```bash
-php -S 0.0.0.0:8000
-```
-
-### 查找本機 IP：
-
-**Linux/Mac：**
-```bash
-hostname -I
-# 或
-ifconfig | grep "inet "
-```
-
-**Windows：**
-```bash
-ipconfig
-```
-
-找到 IP 後（例如 `192.168.1.100`），其他設備可訪問：
-```
-http://192.168.1.100:8000/index.html
+pico_traffic/
+├── index.html              # 主程序（包含所有代碼）
+├── tesla_cybertruck.glb    # Tesla Cybertruck 3D 模型（預設）
+├── tesla_cybertruck2.glb   # 備用模型 2
+├── tesla_cybertruck3.glb   # 備用模型 3
+├── README.md               # 專案說明
+├── 打包說明.txt            # 部署與分享指南
+└── .github/
+    └── workflows/
+        └── deploy.yml      # GitHub Actions 自動部署配置
 ```
 
 ---
 
 ## 🎮 使用說明
 
-### 1. 啟動系統
+### 1️⃣ 基本操作
 
-1. 等待 Tesla Cybertruck 模型載入（首次開啟需要幾秒）
-2. 調整四個方向的車流量滑桿：
-   - 🔼 **北向**
-   - 🔽 **南向**
-   - ▶️ **東向**
-   - ◀️ **西向**
-   
-   每個方向可設定：低、中、高
+1. **設定車流量**
+   - 使用滑桿調整四個方向（北、南、東、西）的車流量
+   - 每個方向可設定：低、中、高三種流量
 
-### 2. 連接 Pico W（可選）
+2. **啟動系統**
+   - 點擊「📡 發送至 Pico W」連接硬體（需要 Pico W）
+   - 或點擊「測試南北向」/「測試東西向」按鈕測試
+
+3. **觀察模擬**
+   - 車輛會根據紅綠燈狀態自動停止或通過
+   - 右側面板顯示系統狀態、燈號倒數等資訊
+
+4. **切換模型**
+   - 使用「車輛模型選擇」下拉選單切換不同的 Tesla Cybertruck 模型
+
+5. **重置系統**
+   - 點擊左下角「🔄 重置所有車輛」清空所有車輛
+
+### 2️⃣ 連接 Pico W（選用）
 
 如果有實體 Pico W 設備：
-1. 輸入 Pico W 的 IP 位址
-2. 輸入連接埠（預設 80）
-3. 點擊「📡 發送至 Pico W」
 
-### 3. 測試模式
-
-不需要 Pico W 也可以測試：
-- 點擊「⬍ 測試南北向」：南北向綠燈 20 秒
-- 點擊「⬌ 測試東西向」：東西向綠燈 20 秒
-
-### 4. 車輛模型選擇
-
-可以切換不同的 Tesla Cybertruck 模型（如果有多個模型文件）
-
-### 5. 重置系統
-
-點擊左下角「🔄 重置所有車輛」清空所有車輛
+1. 確保 Pico W 已連接到網路
+2. 輸入 Pico W 的 IP 位址和連接埠
+3. 點擊「發送至 Pico W」
+4. 系統會將車流數據發送到硬體，並接收 AI 決策
 
 ---
 
-## 🚦 交通規則說明
+## 🚦 交通規則
 
-### 車輛行為：
+### 車輛行為
 
-- **綠燈**：車輛加速通過路口
-- **黃燈**：
-  - 未越過停止線的車輛減速停止
-  - 已越過停止線的車輛繼續通過（不會停在路口中間）
-- **紅燈**：車輛停在停止線前
+- **🟢 綠燈**：車輛加速通過路口
+- **🟡 黃燈**：
+  - 未越過停止線 → 減速停止
+  - 已越過停止線 → 繼續通過（不會停在路口中間）
+- **🔴 紅燈**：車輛停在停止線前
 
-### 自動避免重疊：
+### 智能避障
 
-- 同一方向的車輛不會在生成位置重疊
-- 停在紅燈前的車輛不會重疊
-- 最多同時顯示 10 輛車
+- ✅ 同一方向的車輛不會在生成位置重疊
+- ✅ 停在紅燈前的車輛不會重疊
+- ✅ 最多同時顯示 10 輛車
+- ✅ 車輛間保持安全距離
 
-### 車輛生成規則：
+### 車流生成規則
 
-- **低流量**：每 3 秒生成一輛車
-- **中流量**：每 1.5 秒生成一輛車
-- **高流量**：每 0.8 秒生成一輛車
-
----
-
-## 📋 必要文件
-
-### 最小配置（必須）：
-
-```
-pico_traffic/
-├── index.html              ✅ 必須
-└── tesla_cybertruck.glb    ✅ 必須
-```
-
-### 完整配置（推薦）：
-
-```
-pico_traffic/
-├── index.html              ✅ 必須
-├── tesla_cybertruck.glb    ✅ 必須（預設模型）
-├── tesla_cybertruck1.glb   ⭐ 可選（額外模型）
-├── tesla_cybertruck2.glb   ⭐ 可選（額外模型）
-├── tesla_cybertruck3.glb   ⭐ 可選（額外模型）
-└── README.md               📝 說明文件
-```
+| 流量等級 | 生成間隔 | 說明 |
+|---------|---------|------|
+| **低** | 3 秒 | 輕鬆的交通流量 |
+| **中** | 1.5 秒 | 適中的交通流量 |
+| **高** | 0.8 秒 | 繁忙的交通流量 |
 
 ---
 
-## 🔧 故障排除
+## 🔧 技術架構
+
+### 前端技術
+
+- **框架**：Three.js v0.159.0
+- **3D 模型**：GLTF (.glb)
+- **渲染器**：WebGL
+- **控制器**：OrbitControls
+- **物理**：自定義車輛運動邏輯
+
+### 核心功能
+
+1. **車輛系統**
+   - 動態生成與銷毀
+   - 速度與加速度控制
+   - 停止線檢測
+   - 路口通過邏輯
+
+2. **燈號系統**
+   - 紅綠燈狀態管理
+   - 倒數計時器
+   - 黃燈過渡邏輯
+   - 互鎖機制（南北向與東西向互斥）
+
+3. **重疊檢測**
+   - 生成位置檢測
+   - 停止線附近檢測
+   - 車道內距離檢測
+
+4. **模型系統**
+   - 多模型支援
+   - 動態旋轉補償
+   - 高度偏移調整
+
+---
+
+## 🌐 部署方式
+
+### GitHub Pages（已配置）
+
+本專案已配置 GitHub Actions 自動部署：
+
+1. 推送代碼到 `main` 或 `final` 分支
+2. GitHub Actions 自動構建並部署
+3. 2-3 分鐘後可訪問：https://me0608623.github.io/pico_traffic/
+
+### 本地伺服器
+
+#### Python
+```bash
+python3 -m http.server 8000 --bind 0.0.0.0
+# 區域網路訪問：http://你的IP:8000/index.html
+```
+
+#### Node.js
+```bash
+npx http-server -p 8000 -a 0.0.0.0
+# 區域網路訪問：http://你的IP:8000/index.html
+```
+
+### 其他部署選項
+
+- **Netlify**: `netlify deploy --prod`
+- **Vercel**: `vercel --prod`
+- **Cloudflare Pages**: 連接 GitHub 倉庫自動部署
+
+---
+
+## 🛠️ 開發指南
+
+### 克隆專案
+
+```bash
+git clone git@github.com:me0608623/pico_traffic.git
+cd pico_traffic
+```
+
+### 修改代碼
+
+所有代碼都在 `index.html` 中：
+
+- **車輛生成速率**：搜尋 `SPAWN_RATE`
+- **車輛速度**：搜尋 `maxSpeed`, `acceleration`
+- **車輛上限**：搜尋 `vehicles.length >= 10`
+- **模型旋轉**：搜尋 `modelRotationOffset`
+- **停止線位置**：搜尋 `stopLines`
+
+### 提交更新
+
+```bash
+git add .
+git commit -m "更新說明"
+git push origin final
+```
+
+GitHub Pages 會自動重新部署！
+
+---
+
+## 🔍 故障排除
 
 ### 問題 1：模型無法載入
 
-**症狀：** 顯示「載入 Tesla Cybertruck 模型中...」很久，或顯示灰色方塊
+**症狀**：顯示灰色方塊代替車輛
 
-**解決方法：**
-1. ✅ 確認 `tesla_cybertruck.glb` 文件存在
-2. ✅ 確認使用本地伺服器（不要直接雙擊 HTML）
-3. ✅ 檢查瀏覽器控制台（F12）是否有錯誤
-4. ✅ 確認網路連接（需要載入 Three.js CDN）
+**解決方法**：
+1. ✅ 確認 `.glb` 文件存在
+2. ✅ 使用本地伺服器（不要直接打開 HTML）
+3. ✅ 檢查瀏覽器控制台（F12）錯誤訊息
+4. ✅ 確認網路連接（需載入 Three.js CDN）
 
 ### 問題 2：車輛重疊
 
-**症狀：** 多輛車輛在同一位置
+**症狀**：多輛車輛在同一位置
 
-**解決方法：**
+**解決方法**：
 1. 點擊「🔄 重置所有車輛」
 2. 重新整理頁面（F5）
 
-### 問題 3：無法連接 Pico W
+### 問題 3：車輛停在路口
 
-**症狀：** 顯示「連線錯誤」
+**症狀**：黃燈時車輛停在路口中間
 
-**解決方法：**
-1. ✅ 確認 Pico W 已開機並連接到網路
+**解決方法**：
+- ✅ 本專案已修正此問題
+- ✅ 已越過停止線的車輛會繼續通過
+- ✅ 如仍有問題，請重新整理頁面並強制刷新緩存（Ctrl+Shift+R）
+
+### 問題 4：無法連接 Pico W
+
+**症狀**：顯示連線錯誤
+
+**解決方法**：
+1. ✅ 確認 Pico W 已開機並連接網路
 2. ✅ 確認 IP 位址正確
 3. ✅ 確認電腦和 Pico W 在同一網路
 4. ✅ 使用測試按鈕（不需要 Pico W）
 
-### 問題 4：黃燈時車輛停在路口
+### 問題 5：網站顯示舊版本
 
-**症狀：** 車輛在路口中間停止
+**症狀**：修改後網站沒有更新
 
-**解決方法：**
-- ✅ 這個問題已經修正
-- ✅ 已越過停止線的車輛會繼續通過
-- ✅ 如果仍有問題，請重新整理頁面
-
-### 問題 5：其他電腦無法訪問
-
-**症狀：** 無法打開 `http://IP:8000/index.html`
-
-**解決方法：**
-1. ✅ 確認使用 `--bind 0.0.0.0` 或 `-a 0.0.0.0` 啟動伺服器
-2. ✅ 檢查防火牆設定
-3. ✅ 確認兩台電腦在同一網路
-4. ✅ 嘗試 `ping` 測試連接
+**解決方法**：
+1. ✅ 強制刷新：`Ctrl + Shift + R`（Windows/Linux）或 `Cmd + Shift + R`（Mac）
+2. ✅ 清除瀏覽器緩存
+3. ✅ 檢查 GitHub Actions 是否部署完成
+4. ✅ 等待 2-3 分鐘讓 CDN 更新
 
 ---
 
-## 💻 瀏覽器兼容性
+## 💻 瀏覽器支援
 
-| 瀏覽器 | 版本 | 支援 |
-|--------|------|------|
+| 瀏覽器 | 版本 | 支援程度 |
+|--------|------|---------|
 | Chrome | 90+ | ✅ 完全支援 |
 | Firefox | 88+ | ✅ 完全支援 |
 | Safari | 14+ | ✅ 完全支援 |
@@ -280,154 +289,88 @@ pico_traffic/
 
 ---
 
-## 🎨 自訂設定
+## 📦 檔案大小
 
-### 修改車輛生成速率：
+| 檔案 | 大小 | 說明 |
+|------|------|------|
+| `index.html` | 81 KB | 主程序 |
+| `tesla_cybertruck.glb` | 60 MB | 主要 3D 模型 |
+| `tesla_cybertruck2.glb` | 398 KB | 備用模型 2 |
+| `tesla_cybertruck3.glb` | 590 KB | 備用模型 3 |
+| **總計（最小）** | **~60 MB** | index.html + 主模型 |
+| **總計（完整）** | **~61 MB** | 包含所有模型 |
 
-在 `index.html` 中找到：
-```javascript
-const SPAWN_RATE = {
-    low: 3000,      // 低流量（毫秒）
-    medium: 1500,   // 中流量
-    high: 800       // 高流量
-};
-```
-
-### 修改車輛上限：
-
-找到：
-```javascript
-if (vehicles.length >= 10) {  // 改成你想要的數字
-    return;
-}
-```
-
-### 修改車輛速度：
-
-找到 `Vehicle` 類別：
-```javascript
-this.maxSpeed = 0.5;        // 最大速度
-this.acceleration = 0.02;   // 加速度
-this.deceleration = 0.04;   // 減速度
-```
-
----
-
-## 📦 打包分享
-
-### 方法 1：壓縮文件
-
-**最小包（約 1-5 MB）：**
-```bash
-# Linux/Mac
-zip -r pico_traffic.zip index.html tesla_cybertruck.glb README.md
-
-# Windows
-# 右鍵 → 傳送到 → 壓縮的資料夾
-```
-
-**完整包（包含所有模型）：**
-```bash
-zip -r pico_traffic_full.zip pico_traffic/
-```
-
-### 方法 2：Git 倉庫
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/你的用戶名/pico_traffic.git
-git push -u origin main
-```
-
-對方可以：
-```bash
-git clone https://github.com/你的用戶名/pico_traffic.git
-cd pico_traffic
-python3 -m http.server 8000
-```
-
----
-
-## 🌍 部署到線上（無需本地伺服器）
-
-### GitHub Pages（免費）：
-
-1. 推送代碼到 GitHub
-2. 在 Settings → Pages 啟用 GitHub Pages
-3. 訪問：`https://你的用戶名.github.io/pico_traffic/index.html`
-
-### Netlify（免費）：
-
-```bash
-npm install -g netlify-cli
-cd pico_traffic
-netlify deploy --prod
-```
-
-### Vercel（免費）：
-
-```bash
-npm install -g vercel
-cd pico_traffic
-vercel
-```
-
----
-
-## 📝 技術細節
-
-- **框架**：Three.js (v0.159.0)
-- **3D 模型格式**：GLTF (.glb)
-- **渲染器**：WebGL
-- **控制器**：OrbitControls
-- **物理**：自定義車輛運動邏輯
-- **燈光**：環境光 + 方向光 + 填充光
-- **陰影**：PCF 軟陰影
+> ⚠️ 注意：`tesla_cybertruck.glb` (60MB) 超過 GitHub 建議的 50MB，但仍可正常使用。
 
 ---
 
 ## 🤝 貢獻
 
-如果要修改或改進此項目：
+歡迎提交 Issue 和 Pull Request！
 
-1. 所有代碼都在 `index.html` 中（單文件應用）
-2. 3D 模型使用 GLTF 格式
-3. 使用 ES6 模組語法載入 Three.js
+### 開發流程
+
+1. Fork 本專案
+2. 創建功能分支：`git checkout -b feature/amazing-feature`
+3. 提交更改：`git commit -m 'Add amazing feature'`
+4. 推送分支：`git push origin feature/amazing-feature`
+5. 提交 Pull Request
 
 ---
 
 ## 📄 授權
 
-請根據您的需求添加授權信息。
+本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 文件
 
 ---
 
-## 🆘 需要幫助？
+## 🎓 學習資源
 
-如果遇到問題：
-1. 檢查瀏覽器控制台（按 F12）
-2. 確認文件結構正確
-3. 確認使用本地伺服器（不要直接打開 HTML）
-4. 檢查模型文件是否完整
+### Three.js
+- [Three.js 官方文檔](https://threejs.org/docs/)
+- [Three.js 範例](https://threejs.org/examples/)
 
----
+### GLTF 模型
+- [glTF 官方網站](https://www.khronos.org/gltf/)
+- [Sketchfab](https://sketchfab.com/) - 免費 3D 模型
 
-**版本：** v4.0  
-**更新日期：** 2025-12-12  
-**作者：** [您的名字]
-
-**特色功能：**
-- ✅ Tesla Cybertruck 3D 模型
-- ✅ 真實的紅綠燈控制
-- ✅ 動態車流生成
-- ✅ 智能避免重疊
-- ✅ 黃燈邏輯（已越過停止線繼續通過）
-- ✅ 可切換多個模型
-- ✅ 支持 Pico W 連接
+### WebGL
+- [WebGL 基礎教程](https://webglfundamentals.org/)
 
 ---
 
-🚗 **祝您使用愉快！** 🚦
+## 🌟 致謝
 
+- **Three.js** - 3D 圖形庫
+- **GitHub Pages** - 免費託管服務
+- **Pico W** - 硬體控制平台
+
+---
+
+## 📧 聯繫方式
+
+- **GitHub**: [@me0608623](https://github.com/me0608623)
+- **Email**: me0608623@gmail.com
+- **專案網址**: https://me0608623.github.io/pico_traffic/
+
+---
+
+## 📝 更新日誌
+
+### v4.0 (2025-12-12)
+- ✅ 完整的 Tesla Cybertruck 3D 模型
+- ✅ 智能重疊檢測系統
+- ✅ 黃燈邏輯優化（路口內車輛繼續通過）
+- ✅ 多模型支援與旋轉補償
+- ✅ GitHub Pages 自動部署
+- ✅ 完整的文檔與部署指南
+
+---
+
+<p align="center">
+  <strong>🚗 開發者：AA 團隊 | 版本：v4.0 | 更新：2025-12-12 🚦</strong>
+</p>
+
+<p align="center">
+  Made with ❤️ using Three.js and Pico W
+</p>
