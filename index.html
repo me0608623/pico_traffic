@@ -1678,35 +1678,106 @@
         function loadCybertruckModel(modelFileName = 'tesla_cybertruck.glb') {
             const loader = new GLTFLoader();
             currentModelPath = modelFileName;
-
+            
             // 嘗試多個可能的路徑
             const modelPaths = [
                 `./${modelFileName}`,
                 modelFileName,
                 `/${modelFileName}`
             ];
-
+            
             let currentPathIndex = 0;
-
+            let loadStartTime = Date.now();
+            let lastLoadedBytes = 0;
+            let lastSpeedCheckTime = Date.now();
+            let loadTimeout = null;
+            
+            // 添加跳過按鈕
+            function addSkipButton() {
+                const loadingOverlay = document.getElementById('loading');
+                if (!loadingOverlay || loadingOverlay.querySelector('.skip-button')) return;
+                
+                const skipButton = document.createElement('button');
+                skipButton.className = 'skip-button';
+                skipButton.textContent = '⏭️ 使用簡化模型';
+                skipButton.style.cssText = `
+                    margin-top: 20px;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+                `;
+                skipButton.onclick = () => {
+                    console.log('用戶選擇跳過模型載入');
+                    useFallbackModel();
+                };
+                loadingOverlay.appendChild(skipButton);
+            }
+            
+            // 設置超時檢測（30秒）
+            loadTimeout = setTimeout(() => {
+                console.warn('⚠️ 模型載入超時（30秒）');
+                const loadingText = document.querySelector('.loading-text');
+                if (loadingText) {
+                    loadingText.innerHTML = `⚠️ 載入時間較長<br><small>模型較大（60MB），請耐心等待或使用簡化模型</small>`;
+                    loadingText.style.color = '#ffd000';
+                }
+                addSkipButton();
+            }, 30000);
+            
+            function useFallbackModel() {
+                clearTimeout(loadTimeout);
+                console.log('使用備用簡化模型');
+                const loadingText = document.querySelector('.loading-text');
+                if (loadingText) {
+                    loadingText.textContent = '⚠️ 使用簡化方塊代替（模型載入失敗）';
+                    loadingText.style.color = '#ffd000';
+                }
+                
+                // 使用簡單方塊作為備用
+                const boxGeometry = new THREE.BoxGeometry(3, 1.5, 5);
+                const boxMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x888888,
+                    metalness: 0.5,
+                    roughness: 0.5
+                });
+                cybertruckModel = new THREE.Mesh(boxGeometry, boxMaterial);
+                cybertruckModel.castShadow = true;
+                cybertruckModel.receiveShadow = true;
+                
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    addHistory('⚠️ 使用簡化模型（3D模型載入失敗）');
+                }, 1000);
+            }
+            
             function tryLoadModel() {
                 const currentPath = modelPaths[currentPathIndex];
                 console.log(`嘗試載入模型: ${currentPath}`);
-
+                
                 loader.load(
                     currentPath,
                     (gltf) => {
+                        clearTimeout(loadTimeout);
                         console.log('✅ 模型載入成功！', gltf);
                         cybertruckModel = gltf.scene;
-
+                        
                         // 調整模型大小（放大車輛）
                         const box = new THREE.Box3().setFromObject(cybertruckModel);
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
                         const scale = 5 / maxDim; // 增加到 5（原本是 3）讓車子更大
                         cybertruckModel.scale.set(scale, scale, scale);
-
-                        console.log('模型尺寸:', size, '縮放比例:', scale);
-
+                        
+                        const loadTime = ((Date.now() - loadStartTime) / 1000).toFixed(1);
+                        console.log('模型尺寸:', size, '縮放比例:', scale, '載入時間:', loadTime + 's');
+                        
                         // 啟用陰影
                         cybertruckModel.traverse((child) => {
                             if (child.isMesh) {
@@ -1718,24 +1789,38 @@
                                 }
                             }
                         });
-
+                        
                         // 隱藏載入畫面
                         document.getElementById('loading').classList.add('hidden');
-                        addHistory('✅ Tesla Cybertruck 模型載入成功');
+                        addHistory(`✅ Tesla Cybertruck 模型載入成功 (${loadTime}s)`);
                     },
                     (progress) => {
                         if (progress.total > 0) {
-                            const percent = (progress.loaded / progress.total * 100).toFixed(0);
-                            const loadingText = document.querySelector('.loading-text');
-                            if (loadingText) {
-                                loadingText.textContent = `載入模型中... ${percent}%`;
+                            const percent = Math.min(100, (progress.loaded / progress.total * 100)).toFixed(0);
+                            const loadedMB = (progress.loaded / 1024 / 1024).toFixed(1);
+                            const totalMB = (progress.total / 1024 / 1024).toFixed(1);
+                            
+                            // 計算載入速度
+                            const now = Date.now();
+                            const timeDiff = (now - lastSpeedCheckTime) / 1000; // 秒
+                            if (timeDiff > 0.5) { // 每 0.5 秒更新一次速度
+                                const bytesDiff = progress.loaded - lastLoadedBytes;
+                                const speedMBps = (bytesDiff / 1024 / 1024 / timeDiff).toFixed(2);
+                                lastLoadedBytes = progress.loaded;
+                                lastSpeedCheckTime = now;
+                                
+                                const loadingText = document.querySelector('.loading-text');
+                                if (loadingText) {
+                                    loadingText.innerHTML = `載入模型中... ${percent}%<br><small>${loadedMB}MB / ${totalMB}MB (${speedMBps} MB/s)</small>`;
+                                }
                             }
-                            console.log(`載入進度: ${percent}%`);
+                            
+                            console.log(`載入進度: ${percent}% (${loadedMB}/${totalMB} MB)`);
                         }
                     },
                     (error) => {
                         console.error(`路徑 ${currentPath} 載入失敗:`, error);
-
+                        
                         // 嘗試下一個路徑
                         currentPathIndex++;
                         if (currentPathIndex < modelPaths.length) {
@@ -1743,28 +1828,9 @@
                             tryLoadModel();
                         } else {
                             // 所有路徑都失敗，使用備用方案
+                            clearTimeout(loadTimeout);
                             console.error('所有路徑都載入失敗，使用備用方塊');
-                            const loadingText = document.querySelector('.loading-text');
-                            if (loadingText) {
-                                loadingText.textContent = '⚠️ 使用簡化方塊代替（模型載入失敗）';
-                                loadingText.style.color = '#ffd000';
-                            }
-                            addHistory('⚠️ 模型載入失敗，使用簡化方塊代替');
-
-                            // 使用簡單方塊作為備用
-                            const boxGeometry = new THREE.BoxGeometry(3, 1.5, 5);
-                            const boxMaterial = new THREE.MeshStandardMaterial({
-                                color: 0x888888,
-                                metalness: 0.5,
-                                roughness: 0.5
-                            });
-                            cybertruckModel = new THREE.Mesh(boxGeometry, boxMaterial);
-                            cybertruckModel.castShadow = true;
-                            cybertruckModel.receiveShadow = true;
-
-                            setTimeout(() => {
-                                document.getElementById('loading').classList.add('hidden');
-                            }, 2000);
+                            useFallbackModel();
                         }
                     }
                 );
